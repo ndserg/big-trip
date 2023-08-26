@@ -1,34 +1,13 @@
-import { createElement } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 
-const createLoadingTemplate = (loadingText) => {
+const createLoadingTemplate = () => {
   return (
-    `<p class="trip-events__msg">${loadingText}</p>
+    `<p class="trip-events__msg">Loading...</p>
     `);
 };
 
-export default class Loading {
-  #element = null;
-
-  #loadingText = '';
-
-  constructor(loadingText) {
-    this.#element = null;
-    this.#loadingText = loadingText || 'Loading...';
-  }
-
+export default class Loading extends AbstractComponent {
   getTemplate() {
-    return createLoadingTemplate(this.#loadingText);
-  }
-
-  getElement() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
+    return createLoadingTemplate();
   }
 }

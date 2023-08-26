@@ -10,17 +10,25 @@ export const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export const render = (container, element, place) => {
+export const render = (container, component, place) => {
   switch (place) {
     case RenderPosition.AFTERBEGIN:
-      container.prepend(element);
+      container.prepend(component.getElement());
       break;
     case RenderPosition.BEFOREEND:
-      container.append(element);
+      container.append(component.getElement());
       break;
     default:
     // do nothing
   }
+};
+
+export const remove = (element) => {
+  element.remove();
+};
+
+export const replace = (parent, newElement, oldElement) => {
+  parent.replaceChild(newElement, oldElement);
 };
 
 export const getGroupedPoints = (points) => points.reduce((acc, cur) => {

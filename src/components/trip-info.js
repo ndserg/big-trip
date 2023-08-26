@@ -1,4 +1,4 @@
-import { createElement } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 import { MONTHS } from '../const';
 
 const getSortedPoints = (points, sortType) => {
@@ -96,29 +96,16 @@ const createTripInfoTemplate = (points) => {
   `);
 };
 
-export default class TripInfo {
-  #element = null;
-
+export default class TripInfo extends AbstractComponent {
   #points = null;
 
   constructor(points) {
-    this.#element = null;
+    super();
+
     this.#points = points;
   }
 
   getTemplate() {
     return createTripInfoTemplate(this.#points);
-  }
-
-  getElement() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

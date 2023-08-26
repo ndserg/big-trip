@@ -1,4 +1,4 @@
-import { createElement } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 
 const createTripFilterTemplate = (name, idx) => {
   const isChecked = idx === 0 ? 'checked' : '';
@@ -15,37 +15,26 @@ const createTripFiltersTemplate = (filterTypes) => {
   const filters = filterTypes.map((filter, idx) => createTripFilterTemplate(filter, idx)).join('\n');
 
   return (
-    `<h2 class="visually-hidden">Filter events</h2>
-    <form class="trip-filters" action="#" method="get">
-      ${filters}
-      <button class="visually-hidden" type="submit">Accept filter</button>
-    </form>
+    `<div>
+      <h2 class="visually-hidden">Filter events</h2>
+      <form class="trip-filters" action="#" method="get">
+        ${filters}
+        <button class="visually-hidden" type="submit">Accept filter</button>
+      </form>
+    </div>
   `);
 };
 
-export default class TripFilters {
-  #element = null;
-
+export default class TripFilters extends AbstractComponent {
   #filterTypes = null;
 
   constructor(FLITER_TYPES) {
-    this.#element = null;
+    super();
+
     this.#filterTypes = FLITER_TYPES;
   }
 
   getTemplate() {
     return createTripFiltersTemplate(this.#filterTypes);
-  }
-
-  getElement() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }
