@@ -1,4 +1,4 @@
-import { FLITER_TYPES } from '../const';
+import { createElement } from '../utils/utils';
 
 const createTripFilterTemplate = (name, idx) => {
   const isChecked = idx === 0 ? 'checked' : '';
@@ -11,8 +11,8 @@ const createTripFilterTemplate = (name, idx) => {
   `);
 };
 
-export const createTripFiltersTemplate = () => {
-  const filters = FLITER_TYPES.map((filter, idx) => createTripFilterTemplate(filter, idx)).join('\n');
+const createTripFiltersTemplate = (filterTypes) => {
+  const filters = filterTypes.map((filter, idx) => createTripFilterTemplate(filter, idx)).join('\n');
 
   return (
     `<h2 class="visually-hidden">Filter events</h2>
@@ -22,3 +22,30 @@ export const createTripFiltersTemplate = () => {
     </form>
   `);
 };
+
+export default class TripFilters {
+  #element = null;
+
+  #filterTypes = null;
+
+  constructor(FLITER_TYPES) {
+    this.#element = null;
+    this.#filterTypes = FLITER_TYPES;
+  }
+
+  getTemplate() {
+    return createTripFiltersTemplate(this.#filterTypes);
+  }
+
+  getElement() {
+    if (!this.#element) {
+      this.#element = createElement(this.getTemplate());
+    }
+
+    return this.#element;
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

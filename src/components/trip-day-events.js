@@ -1,23 +1,22 @@
 import { createElement } from '../utils/utils';
 
-const createLoadingTemplate = (loadingText) => {
+const createDayEventsTemplate = () => {
   return (
-    `<p class="trip-events__msg">${loadingText}</p>
+    `<ul class="trip-events__list">
+
+    </ul>
     `);
 };
 
-export default class Loading {
+export default class TripDayEvents {
   #element = null;
 
-  #loadingText = '';
-
-  constructor(loadingText) {
+  constructor() {
     this.#element = null;
-    this.#loadingText = loadingText || 'Loading...';
   }
 
   getTemplate() {
-    return createLoadingTemplate(this.#loadingText);
+    return createDayEventsTemplate();
   }
 
   getElement() {

@@ -1,10 +1,12 @@
 {
-  "env": { "es6": true, "browser": true, "commonjs": true },
+  "env": { "es2022": true, "browser": true, "commonjs": true },
   "extends": "airbnb",
   "rules":
     {
       "arrow-body-style": 0,
       "import/prefer-default-export": "off",
       "max-len": ["error", { "code": 280 }],
+      "class-methods-use-this": ["error", { "exceptMethods": ["getTemplate"] }],
     },
+  "parserOptions": { "ecmaVersion": 13 },
 }
