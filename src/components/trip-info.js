@@ -1,3 +1,4 @@
+import { createElement } from '../utils/utils';
 import { MONTHS } from '../const';
 
 const getSortedPoints = (points, sortType) => {
@@ -68,7 +69,7 @@ const getTripDates = (points) => {
   };
 };
 
-export const createTripInfoTemplate = (points) => {
+const createTripInfoTemplate = (points) => {
   const {
     dayFrom,
     dayTo,
@@ -94,3 +95,30 @@ export const createTripInfoTemplate = (points) => {
       </section>
   `);
 };
+
+export default class TripInfo {
+  #element = null;
+
+  #points = null;
+
+  constructor(points) {
+    this.#element = null;
+    this.#points = points;
+  }
+
+  getTemplate() {
+    return createTripInfoTemplate(this.#points);
+  }
+
+  getElement() {
+    if (!this.#element) {
+      this.#element = createElement(this.getTemplate());
+    }
+
+    return this.#element;
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

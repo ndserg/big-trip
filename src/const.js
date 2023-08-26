@@ -1,10 +1,3 @@
-const RENDER_POSITIONS = {
-  beforebegin: 'beforebegin',
-  afterbegin: 'afterbegin',
-  beforeend: 'beforeend',
-  afterend: 'afterend',
-};
-
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEC'];
 
 const FLITER_TYPES = ['everything', 'future', 'past'];
@@ -70,7 +63,6 @@ const OFFERS_TYPES = {
 };
 
 export {
-  RENDER_POSITIONS,
   MONTHS,
   FLITER_TYPES,
   SORT_EVENTS,

@@ -1,4 +1,4 @@
-import { SORT_EVENTS } from '../const';
+import { createElement } from '../utils/utils';
 
 const createTripSortItemTemplate = (name, idx) => {
   const isChecked = idx === 0 ? 'checked' : '';
@@ -16,8 +16,8 @@ const createTripSortItemTemplate = (name, idx) => {
     `);
 };
 
-export const createTripSortTemplate = () => {
-  const tripSortItems = SORT_EVENTS.map((sortEvent, idx) => createTripSortItemTemplate(sortEvent, idx)).join('\n');
+const createTripSortTemplate = (sortEvents) => {
+  const tripSortItems = sortEvents.map((sortEvent, idx) => createTripSortItemTemplate(sortEvent, idx)).join('\n');
 
   return (
     `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
@@ -27,3 +27,30 @@ export const createTripSortTemplate = () => {
     </form>
   `);
 };
+
+export default class TripSort {
+  #element = null;
+
+  #sortEvents = null;
+
+  constructor(SORT_EVENTS) {
+    this.#element = null;
+    this.#sortEvents = SORT_EVENTS;
+  }
+
+  getTemplate() {
+    return createTripSortTemplate(this.#sortEvents);
+  }
+
+  getElement() {
+    if (!this.#element) {
+      this.#element = createElement(this.getTemplate());
+    }
+
+    return this.#element;
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}
