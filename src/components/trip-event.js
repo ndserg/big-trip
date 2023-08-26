@@ -1,4 +1,5 @@
-import { createElement, getEventTimes } from '../utils/utils';
+import AbstractComponent from './abstract-component';
+import { getEventTimes } from '../utils/utils';
 
 const selectedOffersItemTemplate = (offer) => {
   return (
@@ -54,13 +55,12 @@ const createTripEventTemplate = (event) => {
   `);
 };
 
-export default class TripEvent {
-  #element = null;
-
+export default class TripEvent extends AbstractComponent {
   #event;
 
   constructor(event) {
-    this.#element = null;
+    super();
+
     this.#event = event;
   }
 
@@ -68,15 +68,7 @@ export default class TripEvent {
     return createTripEventTemplate(this.#event);
   }
 
-  getElement() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
+  setClickHandler(handler) {
+    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', handler);
   }
 }

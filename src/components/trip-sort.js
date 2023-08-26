@@ -1,4 +1,4 @@
-import { createElement } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 
 const createTripSortItemTemplate = (name, idx) => {
   const isChecked = idx === 0 ? 'checked' : '';
@@ -28,29 +28,16 @@ const createTripSortTemplate = (sortEvents) => {
   `);
 };
 
-export default class TripSort {
-  #element = null;
-
+export default class extends AbstractComponent {
   #sortEvents = null;
 
   constructor(SORT_EVENTS) {
-    this.#element = null;
+    super();
+
     this.#sortEvents = SORT_EVENTS;
   }
 
   getTemplate() {
     return createTripSortTemplate(this.#sortEvents);
-  }
-
-  getElement() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

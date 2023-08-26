@@ -1,4 +1,4 @@
-import { createElement } from '../utils/utils';
+import AbstractComponent from './abstract-component';
 import { OFFERS_TYPES, EVENT_TYPES } from '../const';
 
 const createEditModeTemplate = () => {
@@ -146,9 +146,7 @@ const createEventFormTemplate = (allOffers, destinations, mode) => {
   `);
 };
 
-export default class EventForm {
-  #element = null;
-
+export default class EventForm extends AbstractComponent {
   #offers = null;
 
   #destinations = null;
@@ -156,7 +154,8 @@ export default class EventForm {
   #mode;
 
   constructor(offers, destinations, mode) {
-    this.#element = null;
+    super();
+
     this.#offers = offers;
     this.#destinations = destinations;
     this.#mode = mode || 'add';
@@ -166,15 +165,7 @@ export default class EventForm {
     return createEventFormTemplate(this.#offers, this.#destinations, this.#mode);
   }
 
-  getElement() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
+  setClickHandler(handler) {
+    this.getElement().addEventListener('click', handler);
   }
 }
