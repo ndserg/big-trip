@@ -1,24 +1,10 @@
 import AbstractComponent from './abstract-component';
 import { MONTHS } from '../const';
 
-const getSortedPoints = (points, sortType) => {
-  let sortedPoints = points.slice();
-
-  if (sortType === 'DESC') {
-    sortedPoints = sortedPoints.sort((a, b) => new Date(b.date_from) - new Date(a.date_from));
-  } else {
-    sortedPoints = sortedPoints.sort((a, b) => new Date(a.date_from) - new Date(b.date_from));
-  }
-
-  return sortedPoints;
-};
-
 const getBorderPoints = (points) => {
-  const sortedPoints = getSortedPoints(points, 'ASC');
-
   return {
-    firstPoint: sortedPoints[0],
-    lastPoint: sortedPoints[sortedPoints.length - 1],
+    firstPoint: points[0],
+    lastPoint: points[points.length - 1],
   };
 };
 
@@ -29,24 +15,23 @@ const calculatePrice = (points) => {
 };
 
 const createTripCitiesTemplate = (points) => {
-  const sortedPoints = getSortedPoints(points, 'ASC');
   let tripCitiesString = '';
 
-  switch (sortedPoints.length) {
+  switch (points.length) {
     case 0:
       tripCitiesString = 'There is no points yet';
       break;
     case 1:
-      tripCitiesString = `<h1 class="trip-info__title">${sortedPoints[0].destination.name}</h1>`;
+      tripCitiesString = `<h1 class="trip-info__title">${points[0].destination.name}</h1>`;
       break;
     case 2:
-      tripCitiesString = `<h1 class="trip-info__title">${sortedPoints[0].destination.name} &mdash; ${sortedPoints[1].destination.name}</h1>`;
+      tripCitiesString = `<h1 class="trip-info__title">${points[0].destination.name} &mdash; ${points[1].destination.name}</h1>`;
       break;
     case 3:
-      tripCitiesString = `<h1 class="trip-info__title">${sortedPoints[0].destination.name} &mdash; ${sortedPoints[1].destination.name}  &mdash; ${sortedPoints[2].destination.name}</h1>`;
+      tripCitiesString = `<h1 class="trip-info__title">${points[0].destination.name} &mdash; ${points[1].destination.name}  &mdash; ${points[2].destination.name}</h1>`;
       break;
     default:
-      tripCitiesString = `<h1 class="trip-info__title">${sortedPoints[0].destination.name} &mdash; ... &mdash; ${sortedPoints[sortedPoints.length - 1].destination.name}</h1>`;
+      tripCitiesString = `<h1 class="trip-info__title">${points[0].destination.name} &mdash; ... &mdash; ${points[points.length - 1].destination.name}</h1>`;
       break;
   }
 

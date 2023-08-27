@@ -31,16 +31,24 @@ export const replace = (parent, newElement, oldElement) => {
   parent.replaceChild(newElement, oldElement);
 };
 
-export const getGroupedPoints = (points) => points.reduce((acc, cur) => {
-  const currentDate = new Date(cur.date_from);
-  if (acc[currentDate.toLocaleDateString()]) {
-    acc[currentDate.toLocaleDateString()].push(cur);
-  } else {
-    acc[currentDate.toLocaleDateString()] = [];
-    acc[currentDate.toLocaleDateString()].push(cur);
-  }
-  return acc;
-}, {});
+export const getGroupedPoints = (points) => {
+  let dayIdx = 0;
+  let currentDate = '';
+  const groupedPoints = [];
+
+  points.slice().forEach((point) => {
+    const currentPointDate = new Date(point.date_from);
+    if (currentPointDate.toLocaleDateString() === currentDate) {
+      groupedPoints[dayIdx - 1].push(point);
+    } else {
+      currentDate = currentPointDate.toLocaleDateString();
+      groupedPoints.push([point]);
+      dayIdx += 1;
+    }
+  });
+
+  return groupedPoints;
+};
 
 export const addLeadingZero = (num) => {
   return num < 10 ? `0${num}` : num;
