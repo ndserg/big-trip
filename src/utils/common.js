@@ -1,36 +1,3 @@
-export const RenderPosition = {
-  AFTERBEGIN: 'afterbegin',
-  BEFOREEND: 'beforeend',
-};
-
-export const createElement = (template) => {
-  const newElement = document.createElement('div');
-  newElement.innerHTML = template;
-
-  return newElement.firstChild;
-};
-
-export const render = (container, component, place) => {
-  switch (place) {
-    case RenderPosition.AFTERBEGIN:
-      container.prepend(component.getElement());
-      break;
-    case RenderPosition.BEFOREEND:
-      container.append(component.getElement());
-      break;
-    default:
-    // do nothing
-  }
-};
-
-export const remove = (element) => {
-  element.remove();
-};
-
-export const replace = (parent, newElement, oldElement) => {
-  parent.replaceChild(newElement, oldElement);
-};
-
 export const getGroupedPoints = (points) => {
   let dayIdx = 0;
   let currentDate = '';
@@ -85,4 +52,8 @@ export const getEventTimes = (from, to) => {
     dateTo: timeToToString,
     duration: eventDurationString,
   };
+};
+
+export const getPointOffers = (pointType, offers) => {
+  return offers.find((currentOffers) => currentOffers.type === pointType) || { type: pointType, offers: [] };
 };

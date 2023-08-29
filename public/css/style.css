@@ -755,6 +755,9 @@ main {
   margin-right: 5px;
   cursor: pointer; }
 
+.event__label::first-letter {
+  text-transform: uppercase; }
+
 .event__input {
   -ms-flex-positive: 1;
       flex-grow: 1;

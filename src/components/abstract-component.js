@@ -1,4 +1,4 @@
-import { createElement } from '../utils/utils';
+import { createElement } from '../utils/render';
 
 export default class AbstractComponent {
   #element;
