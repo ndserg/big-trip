@@ -10,10 +10,15 @@
     "start": "webpack serve"
   },
   "devDependencies": {
+    "css-loader": "6.8.1",
     "eslint": "8.47.0",
     "eslint-config-airbnb": "19.0.4",
+    "style-loader": "3.3.3",
     "webpack": "5.88.2",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "4.15.1"
+  },
+  "dependencies": {
+    "flatpickr": "4.6.13"
   }
 }
