@@ -2,8 +2,8 @@ import AbstractComponent from './abstract-component';
 import { MONTHS } from '../const';
 
 const createTripDayTemplate = (day, idx, isShowDayInfo) => {
-  const formatDay = day.toLocaleDateString().split('.').reverse().join('-');
-  const currentDate = new Date(formatDay);
+  const currentDate = new Date(day);
+  const formatDay = currentDate.toLocaleDateString().split('.').reverse().join('-');
   const dayNumber = currentDate.getDate();
   const month = MONTHS[currentDate.getMonth()];
 

@@ -1,5 +1,6 @@
 import AbstractComponent from './abstract-component';
-import { getEventTimes } from '../utils/utils';
+import { getEventTimes } from '../utils/common';
+import { EVENT_TYPES } from '../const';
 
 const selectedOffersItemTemplate = (offer) => {
   return (
@@ -25,13 +26,14 @@ const selectedOffersTemplate = (offers) => {
 const createTripEventTemplate = (event) => {
   const times = getEventTimes(event.date_from, event.date_to);
   const selectedOffers = event.offers && event.offers.length > 0 ? selectedOffersTemplate(event.offers) : '';
+  const evenTypePreposition = EVENT_TYPES.transfer.includes(event.type) ? 'to' : 'in';
 
   return (
     `<div class="event">
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${event.type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${event.type} to ${event.destination.name}</h3>
+      <h3 class="event__title">${event.type} ${evenTypePreposition} ${event.destination.name}</h3>
 
       <div class="event__schedule">
         <p class="event__time">
@@ -58,17 +60,25 @@ const createTripEventTemplate = (event) => {
 export default class TripEvent extends AbstractComponent {
   #event;
 
+  #rollupButtonClickHandler;
+
   constructor(event) {
     super();
 
     this.#event = event;
+    this.#rollupButtonClickHandler = null;
   }
 
   getTemplate() {
     return createTripEventTemplate(this.#event);
   }
 
-  setClickHandler(handler) {
+  recoveryListeners() {
+    this.setRollupButtonClickHandler(this.#rollupButtonClickHandler);
+  }
+
+  setRollupButtonClickHandler(handler) {
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', handler);
+    this.#rollupButtonClickHandler = handler;
   }
 }

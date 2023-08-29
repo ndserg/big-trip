@@ -4,8 +4,7 @@ import TripTabsComponent from './components/trip-tabs';
 import TripFiltersComponent from './components/trip-filters';
 import LoadingComponent from './components/loading';
 import { TABS, FLITER_TYPES } from './const';
-import { render, RenderPosition } from './utils/utils';
-
+import { render, RenderPosition } from './utils/render';
 import { getPoints, getOffers, getDestinations } from './components/api-service';
 
 const tripMainContainer = document.querySelector('.trip-main');
@@ -29,14 +28,16 @@ const loadData = () => {
 
   Promise.all([loadPoints, loadOffers, loadDestinations]).then((values) => {
     const [points, offers, destinations] = values;
-    localStorage.data = JSON.stringify({ points, offers, destinations });
+    localStorage.points = JSON.stringify(points);
+    localStorage.offers = JSON.stringify(offers);
+    localStorage.destinations = JSON.stringify(destinations);
 
-    tripController.render({ points, offers, destinations });
+    tripController.render(points, offers, destinations);
   });
 };
 
-if (localStorage.data) {
-  tripController.render(JSON.parse(localStorage.data));
+if (localStorage.points && localStorage.offers && localStorage.destinations) {
+  tripController.render(JSON.parse(localStorage.points), JSON.parse(localStorage.offers), JSON.parse(localStorage.destinations));
 } else {
   loadData();
 }

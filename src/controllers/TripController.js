@@ -1,54 +1,14 @@
+import PointController, { Mode as PointControllerMode } from './PointController';
 import TripEventsComponent from '../components/trip-events';
 import TripDayEventsComponent from '../components/trip-day-events';
-import TripEventComponent from '../components/trip-event';
 import TripInfoComponent from '../components/trip-info';
 import TripSortComponent, { SortType, SortDirections } from '../components/trip-sort';
 import TripDaysComponent from '../components/trip-days';
 import TripDayComponent from '../components/trip-day';
-import EventFormComponent from '../components/event-form';
 import NoPointsComponent from '../components/no-points';
 import { SORT_EVENTS } from '../const';
-import {
-  getGroupedPoints,
-  render,
-  remove,
-  replace,
-  RenderPosition,
-} from '../utils/utils';
-
-const renderEvent = (dayElement, events, offers, destinations) => {
-  const eventComponent = new TripEventComponent(events);
-  const editDayComponent = new EventFormComponent(offers, destinations, 'edit');
-
-  render(dayElement, eventComponent, RenderPosition.BEFOREEND);
-
-  eventComponent.setClickHandler(() => {
-    replace(dayElement, editDayComponent.getElement(), eventComponent.getElement());
-  });
-
-  editDayComponent.setClickHandler((evt) => {
-    evt.preventDefault();
-
-    if (evt.target.classList.contains('event__save-btn') || evt.target.classList.contains('event__reset-btn') || evt.target.classList.contains('event__rollup-btn')) {
-      replace(dayElement, eventComponent.getElement(), editDayComponent.getElement());
-    }
-  });
-};
-
-const renderDay = (tripDaysListElement, pointsByDay, idx, offers, destinations, sortType) => {
-  const isShowDayInfo = sortType === SortType.EVENT;
-  const date = new Date(pointsByDay[0].date_from);
-  const dayComponent = new TripDayComponent(date, idx, isShowDayInfo);
-  const tripDayEventsComponent = new TripDayEventsComponent();
-
-  render(tripDaysListElement, dayComponent, RenderPosition.BEFOREEND);
-
-  pointsByDay.forEach((event) => {
-    renderEvent(tripDayEventsComponent.getElement(), event, offers, destinations);
-  });
-
-  render(dayComponent.getElement(), tripDayEventsComponent, RenderPosition.BEFOREEND);
-};
+import { getGroupedPoints } from '../utils/common';
+import { render, RenderPosition } from '../utils/render';
 
 export const getSortedPoints = (points, sortType, sortDirection) => {
   let sortedPoints = [];
@@ -79,6 +39,12 @@ export const getSortedPoints = (points, sortType, sortDirection) => {
 export default class TripController {
   #container = null;
 
+  #points;
+
+  #offers;
+
+  #destinations;
+
   #eventsComponent = null;
 
   #tripDaysComponent = null;
@@ -87,37 +53,80 @@ export default class TripController {
 
   #tripSortComponent = null;
 
+  #showedPointControllers;
+
   constructor(container) {
     this.#container = container;
 
+    this.#points = [];
+    this.#offers = [];
+    this.#destinations = [];
+    this.#showedPointControllers = [];
     this.#eventsComponent = new TripEventsComponent();
     this.#tripDaysComponent = new TripDaysComponent();
     this.#noPointsComponent = new NoPointsComponent();
     this.#tripSortComponent = new TripSortComponent(SORT_EVENTS);
   }
 
-  render({ points, offers, destinations }) {
-    if (points.length === 0) {
+  render(points, offers, destinations) {
+    this.#points = points;
+    this.#offers = offers;
+    this.#destinations = destinations;
+
+    if (this.#points.length === 0) {
       render(this.#container.getElement(), this.#noPointsComponent, RenderPosition.AFTERBEGIN);
       return;
     }
 
     const tripMainContainer = document.querySelector('.trip-main');
-    const groupedPoints = getGroupedPoints(points);
+    const groupedPoints = getGroupedPoints(this.#points);
 
-    groupedPoints.map((pointsByDay, idx) => renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, offers, destinations, SortType.EVENT));
+    groupedPoints.map((pointsByDay, idx) => this.#renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, SortType.EVENT));
 
-    remove(this.#container.getElement().querySelector('.trip-events__msg'));
+    (this.#container.getElement().querySelector('.trip-events__msg')).remove();
 
-    render(tripMainContainer, new TripInfoComponent(points), RenderPosition.AFTERBEGIN);
+    render(tripMainContainer, new TripInfoComponent(this.#points), RenderPosition.AFTERBEGIN);
     render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
     render(this.#eventsComponent.getElement(), this.#tripSortComponent, RenderPosition.BEFOREEND);
     render(this.#eventsComponent.getElement(), this.#tripDaysComponent, RenderPosition.BEFOREEND);
 
     this.#tripSortComponent.setSortTypeChangeHandler((sortType, sortDirection) => {
-      const sortedPoints = getSortedPoints(points, sortType, sortDirection);
+      const sortedPoints = getSortedPoints(this.#points, sortType, sortDirection);
       this.#tripDaysComponent.getElement().innerHTML = '';
-      sortedPoints.map((pointsByDay, idx) => renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, offers, destinations, sortType));
+      sortedPoints.map((pointsByDay, idx) => this.#renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, sortType));
     });
+  }
+
+  #renderDay(tripDaysListElement, pointsByDay, idx, sortType) {
+    const isShowDayInfo = sortType === SortType.EVENT;
+    const date = new Date(pointsByDay[0].date_from);
+    const dayComponent = new TripDayComponent(date, idx, isShowDayInfo);
+    const tripDayEventsComponent = new TripDayEventsComponent();
+
+    render(tripDaysListElement, dayComponent, RenderPosition.BEFOREEND);
+    pointsByDay.forEach((event) => {
+      const pointController = new PointController(tripDayEventsComponent.getElement(), this.#onDataChange.bind(this), this.#onViewChange.bind(this));
+      this.#showedPointControllers.push(pointController);
+      pointController.render(event, this.#offers, this.#destinations, PointControllerMode.DEFAULT);
+    });
+
+    render(dayComponent.getElement(), tripDayEventsComponent, RenderPosition.BEFOREEND);
+  }
+
+  #onDataChange(pointController, oldPoint, newPoint, mode) {
+    const index = this.#points.findIndex((point) => point === oldPoint);
+
+    if (index === -1) {
+      return;
+    }
+
+    this.#points = [].concat(this.#points.slice(0, index), newPoint, this.#points.slice(index + 1));
+    const updatedPoint = this.#points[index];
+
+    pointController.render(updatedPoint, this.#offers, this.#destinations, mode);
+  }
+
+  #onViewChange() {
+    this.#showedPointControllers.forEach((pointController) => pointController.setDefaultView());
   }
 }
