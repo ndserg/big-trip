@@ -1,3 +1,4 @@
+import PointsModel from './models/points';
 import TripController from './controllers/TripController';
 import MainContainer from './components/main-container';
 import TripTabsComponent from './components/trip-tabs';
@@ -11,13 +12,29 @@ const tripMainContainer = document.querySelector('.trip-main');
 const tripControlsContainer = tripMainContainer.querySelector('.trip-controls');
 const pageMain = document.querySelector('.page-main');
 const mainContainerComponent = new MainContainer();
-const tripController = new TripController(mainContainerComponent);
+const loadingComponent = new LoadingComponent();
+
+const mainContainerElement = mainContainerComponent.getElement();
 
 render(tripControlsContainer, new TripTabsComponent(TABS), RenderPosition.AFTERBEGIN);
 render(tripControlsContainer, new TripFiltersComponent(FLITER_TYPES), RenderPosition.BEFOREEND);
 
 render(pageMain, mainContainerComponent, RenderPosition.AFTERBEGIN);
-render(mainContainerComponent.getElement(), new LoadingComponent(), RenderPosition.BEFOREEND);
+render(mainContainerElement, loadingComponent, RenderPosition.BEFOREEND);
+
+const initApp = (points, offers, destinations) => {
+  const pointsModel = new PointsModel();
+  pointsModel.points = points;
+  pointsModel.offers = offers;
+  pointsModel.destinations = destinations;
+
+  const tripController = new TripController(mainContainerComponent, pointsModel);
+
+  loadingComponent.getElement().remove();
+  loadingComponent.removeElement();
+
+  tripController.render();
+};
 
 const loadData = () => {
   const loadPoints = getPoints().then((values) => values);
@@ -32,12 +49,12 @@ const loadData = () => {
     localStorage.offers = JSON.stringify(offers);
     localStorage.destinations = JSON.stringify(destinations);
 
-    tripController.render(points, offers, destinations);
+    initApp(points, offers, destinations);
   });
 };
 
 if (localStorage.points && localStorage.offers && localStorage.destinations) {
-  tripController.render(JSON.parse(localStorage.points), JSON.parse(localStorage.offers), JSON.parse(localStorage.destinations));
+  initApp(JSON.parse(localStorage.points), JSON.parse(localStorage.offers), JSON.parse(localStorage.destinations));
 } else {
   loadData();
 }
