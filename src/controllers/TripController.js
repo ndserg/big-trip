@@ -39,8 +39,6 @@ export const getSortedPoints = (points, sortType, sortDirection) => {
 export default class TripController {
   #container = null;
 
-  #pointsModel;
-
   #points;
 
   #offers;
@@ -57,9 +55,8 @@ export default class TripController {
 
   #showedPointControllers;
 
-  constructor(container, pointsModel) {
+  constructor(container) {
     this.#container = container;
-    this.#pointsModel = pointsModel;
 
     this.#points = [];
     this.#offers = [];
@@ -71,10 +68,10 @@ export default class TripController {
     this.#tripSortComponent = new TripSortComponent(SORT_EVENTS);
   }
 
-  render() {
-    this.#points = this.#pointsModel.points;
-    this.#offers = this.#pointsModel.offers;
-    this.#destinations = this.#pointsModel.destinations;
+  render(points, offers, destinations) {
+    this.#points = points;
+    this.#offers = offers;
+    this.#destinations = destinations;
 
     if (this.#points.length === 0) {
       render(this.#container.getElement(), this.#noPointsComponent, RenderPosition.AFTERBEGIN);
@@ -85,6 +82,8 @@ export default class TripController {
     const groupedPoints = getGroupedPoints(this.#points);
 
     groupedPoints.map((pointsByDay, idx) => this.#renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, SortType.EVENT));
+
+    (this.#container.getElement().querySelector('.trip-events__msg')).remove();
 
     render(tripMainContainer, new TripInfoComponent(this.#points), RenderPosition.AFTERBEGIN);
     render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
@@ -115,11 +114,16 @@ export default class TripController {
   }
 
   #onDataChange(pointController, oldPoint, newPoint, mode) {
-    const isSuccess = this.#pointsModel.updatePoint(oldPoint.id, newPoint);
+    const index = this.#points.findIndex((point) => point === oldPoint);
 
-    if (isSuccess) {
-      pointController.render(newPoint, this.#offers, this.#destinations, mode);
+    if (index === -1) {
+      return;
     }
+
+    this.#points = [].concat(this.#points.slice(0, index), newPoint, this.#points.slice(index + 1));
+    const updatedPoint = this.#points[index];
+
+    pointController.render(updatedPoint, this.#offers, this.#destinations, mode);
   }
 
   #onViewChange() {
