@@ -62,6 +62,11 @@ const OFFERS_TYPES = {
   },
 };
 
+const DatesRange = {
+  date_from: 'date_from',
+  date_to: 'date_to',
+};
+
 export {
   MONTHS,
   FLITER_TYPES,
@@ -69,4 +74,5 @@ export {
   TABS,
   EVENT_TYPES,
   OFFERS_TYPES,
+  DatesRange,
 };

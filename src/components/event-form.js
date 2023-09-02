@@ -1,6 +1,8 @@
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 import AbstractSmartComponent from './abstract-smart-component';
 import { getEventTimes, getPointOffers } from '../utils/common';
-import { OFFERS_TYPES, EVENT_TYPES } from '../const';
+import { OFFERS_TYPES, EVENT_TYPES, DatesRange } from '../const';
 
 const getFormattedDate = (date) => {
   const currentDate = new Date(date);
@@ -196,6 +198,14 @@ export default class EventForm extends AbstractSmartComponent {
 
   #pointOffers;
 
+  #selecetdDateFrom;
+
+  #selecetdDateTo;
+
+  #flatpickrDateFrom;
+
+  #flatpickrDateTo;
+
   constructor(point, offers, destinations, mode) {
     super();
 
@@ -214,6 +224,14 @@ export default class EventForm extends AbstractSmartComponent {
     this.#pointOffers = getPointOffers(this.#currentPoint.type, this.#offers);
     this.#mode = mode || 'add';
     this.#rollupButtonClickHandler = null;
+
+    this.#selecetdDateFrom = this.#currentPoint.date_from;
+    this.#selecetdDateTo = this.#currentPoint.date_to;
+
+    this.#flatpickrDateFrom = null;
+    this.#flatpickrDateTo = null;
+
+    this.#applyFlatpickr();
     this.subscribeOnEvents();
   }
 
@@ -228,6 +246,8 @@ export default class EventForm extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
+
+    this.#applyFlatpickr();
   }
 
   reset() {
@@ -244,6 +264,54 @@ export default class EventForm extends AbstractSmartComponent {
     };
 
     this.rerender();
+  }
+
+  #setSelectedDate = ([date], instance) => {
+    switch (instance) {
+      case DatesRange.date_from:
+        this.#selecetdDateFrom = date;
+        break;
+      case DatesRange.date_to:
+        this.#selecetdDateTo = date;
+        break;
+      default: // do nothing
+    }
+  };
+
+  #applyFlatpickr() {
+    if (this.#flatpickrDateFrom) {
+      this.#flatpickrDateFrom.destroy();
+      this.#flatpickrDateTo.destroy();
+      this.#flatpickrDateFrom = null;
+      this.#flatpickrDateTo = null;
+    }
+
+    const dateFromElement = this.getElement().querySelector('input[name="event-start-time"]');
+    const dateToElement = this.getElement().querySelector('input[name="event-end-time"]');
+
+    this.#flatpickrDateTo = flatpickr(dateToElement, {
+      altInput: true,
+      enableTime: true,
+      time_24hr: true,
+      dateFormat: 'd/m/y H:i',
+      altFormat: 'd/m/y H:i',
+      minDate: this.#selecetdDateFrom,
+      defaultDate: this.#selecetdDateTo,
+      onChange: (selectedDates) => this.#setSelectedDate(selectedDates, DatesRange.date_to),
+    });
+
+    this.#flatpickrDateFrom = flatpickr(dateFromElement, {
+      altInput: true,
+      enableTime: true,
+      time_24hr: true,
+      dateFormat: 'd/m/y H:i',
+      altFormat: 'd/m/y H:i',
+      defaultDate: this.#selecetdDateFrom,
+      onChange: (selectedDates) => {
+        this.#setSelectedDate(selectedDates, DatesRange.date_from);
+        this.#flatpickrDateTo.set('minDate', this.#selecetdDateFrom);
+      },
+    });
   }
 
   subscribeOnEvents() {
