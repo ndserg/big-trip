@@ -3,6 +3,7 @@ import EventFormComponent from '../components/event-form';
 import {
   render,
   replace,
+  remove,
   RenderPosition,
 } from '../utils/render';
 
@@ -95,6 +96,11 @@ export default class TripController {
     if (this.#mode !== Mode.DEFAULT) {
       this.#replaceEditFormToEvent();
     }
+  }
+
+  destroy() {
+    remove(this.#pointComponent);
+    remove(this.#editDayComponent);
   }
 
   #replaceEditFormToEvent() {

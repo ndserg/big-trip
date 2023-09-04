@@ -29,31 +29,33 @@ const createTripEventTemplate = (event) => {
   const evenTypePreposition = EVENT_TYPES.transfer.includes(event.type) ? 'to' : 'in';
 
   return (
-    `<div class="event">
-      <div class="event__type">
-        <img class="event__type-icon" width="42" height="42" src="img/icons/${event.type}.png" alt="Event type icon">
-      </div>
-      <h3 class="event__title">${event.type} ${evenTypePreposition} ${event.destination.name}</h3>
+    `<li class="trip-events__item">
+      <div class="event">
+        <div class="event__type">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${event.type}.png" alt="Event type icon">
+        </div>
+        <h3 class="event__title">${event.type} ${evenTypePreposition} ${event.destination.name}</h3>
 
-      <div class="event__schedule">
-        <p class="event__time">
-          <time class="event__start-time" datetime="${event.date_from}">${times.dateFrom}</time>
-          &mdash;
-          <time class="event__end-time" datetime="${event.date_to}">${times.dateTo}</time>
+        <div class="event__schedule">
+          <p class="event__time">
+            <time class="event__start-time" datetime="${event.date_from}">${times.dateFrom}</time>
+            &mdash;
+            <time class="event__end-time" datetime="${event.date_to}">${times.dateTo}</time>
+          </p>
+          <p class="event__duration">${times.duration}</p>
+        </div>
+
+        <p class="event__price">
+          &euro;&nbsp;<span class="event__price-value">${event.base_price}</span>
         </p>
-        <p class="event__duration">${times.duration}</p>
+
+          ${selectedOffers}
+
+        <button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>
       </div>
-
-      <p class="event__price">
-        &euro;&nbsp;<span class="event__price-value">${event.base_price}</span>
-      </p>
-
-        ${selectedOffers}
-
-      <button class="event__rollup-btn" type="button">
-        <span class="visually-hidden">Open event</span>
-      </button>
-    </div>
+    </li>
   `);
 };
 

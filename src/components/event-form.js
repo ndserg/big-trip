@@ -131,55 +131,57 @@ const createEventFormTemplate = (point, offers, destinations, mode) => {
   const offersTemplate = offers.length !== 0 ? createOffersContainerTemplate(point, offers) : '';
 
   return (
-    `<form class="${isEditMode ? '' : 'trip-events__item '}event event--edit" action="#" method="post">
-      <header class="event__header">
-        <div class="event__type-wrapper">
-          <label class="event__type  event__type-btn" for="event-type-toggle-1">
-            <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${point.type}.png" alt="Event type icon">
-          </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+    `<li class="trip-events__item">
+      <form class="${isEditMode ? '' : 'trip-events__item '}event event--edit" action="#" method="post">
+        <header class="event__header">
+          <div class="event__type-wrapper">
+            <label class="event__type  event__type-btn" for="event-type-toggle-1">
+              <span class="visually-hidden">Choose event type</span>
+              <img class="event__type-icon" width="17" height="17" src="img/icons/${point.type}.png" alt="Event type icon">
+            </label>
+            <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
-          ${eventTypeList}
-        </div>
+            ${eventTypeList}
+          </div>
 
-        <div class="event__field-group  event__field-group--destination">
-          <label class="event__label  event__type-output" for="event-destination-1">
-          ${point.type} ${typePreposition} ${point.destination.name}
-          </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="" list="destination-list-1">
-          <datalist id="destination-list-1">
-            ${destinationsTemplate}
-          </datalist>
-        </div>
+          <div class="event__field-group  event__field-group--destination">
+            <label class="event__label  event__type-output" for="event-destination-1">
+            ${point.type} ${typePreposition} ${point.destination.name}
+            </label>
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="" list="destination-list-1">
+            <datalist id="destination-list-1">
+              ${destinationsTemplate}
+            </datalist>
+          </div>
 
-        <div class="event__field-group  event__field-group--time">
-          <label class="visually-hidden" for="event-start-time-1">
-            From
-          </label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom} ${times.dateFrom}">
-          &mdash;
-          <label class="visually-hidden" for="event-end-time-1">
-            To
-          </label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo} ${times.dateTo}">
-        </div>
+          <div class="event__field-group  event__field-group--time">
+            <label class="visually-hidden" for="event-start-time-1">
+              From
+            </label>
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom} ${times.dateFrom}">
+            &mdash;
+            <label class="visually-hidden" for="event-end-time-1">
+              To
+            </label>
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo} ${times.dateTo}">
+          </div>
 
-        <div class="event__field-group  event__field-group--price">
-          <label class="event__label" for="event-price-1">
-            <span class="visually-hidden">Price</span>
-            &euro;${point.base_price}
-          </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
-        </div>
+          <div class="event__field-group  event__field-group--price">
+            <label class="event__label" for="event-price-1">
+              <span class="visually-hidden">Price</span>
+              &euro;${point.base_price}
+            </label>
+            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
+          </div>
 
-        <button class="event__save-btn btn btn--blue" type="submit">${buttons.save}</button>
-        <button class="event__reset-btn" type="reset">${buttons.cancel}</button>
+          <button class="event__save-btn btn btn--blue" type="submit">${buttons.save}</button>
+          <button class="event__reset-btn" type="reset">${buttons.cancel}</button>
 
-        ${editModeTemplate}
-      </header>
-        ${offersTemplate}
-    </form>
+          ${editModeTemplate}
+        </header>
+          ${offersTemplate}
+      </form>
+    </li>
   `);
 };
 
@@ -386,7 +388,7 @@ export default class EventForm extends AbstractSmartComponent {
   }
 
   setRollupButtonClickHandler(handler) {
-    this.getElement().addEventListener('click', handler);
+    this.getElement().firstElementChild.addEventListener('click', handler);
     this.#rollupButtonClickHandler = handler;
   }
 }

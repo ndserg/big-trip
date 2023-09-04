@@ -1,3 +1,6 @@
+import { FilterType } from '../const';
+import getFilteredPoints from '../utils/filters';
+
 export default class PointsModel {
   #points;
 
@@ -5,10 +8,24 @@ export default class PointsModel {
 
   #destinations;
 
+  #activeFilterType;
+
+  #handlers;
+
   constructor() {
     this.#points = [];
     this.#offers = [];
     this.#destinations = [];
+    this.#activeFilterType = FilterType.EVERYTHING;
+
+    this.#handlers = {
+      filterChange: new Set(),
+      dataChange: new Set(),
+    };
+  }
+
+  getFilteredPoints() {
+    return getFilteredPoints(this.points, this.getActiveFilter());
   }
 
   get points() {
@@ -44,6 +61,29 @@ export default class PointsModel {
 
     this.#points = [].concat(this.#points.slice(0, index), newPoint, this.#points.slice(index + 1));
 
+    this.#callHandlers('dataChange');
+
     return true;
+  }
+
+  setFilter(filterType) {
+    this.#activeFilterType = filterType;
+    this.#callHandlers('filterChange');
+  }
+
+  getActiveFilter() {
+    return this.#activeFilterType;
+  }
+
+  setDataChangeHandler(handler) {
+    this.#handlers.dataChange.add(handler);
+  }
+
+  setFilterChangeHandler(handler) {
+    this.#handlers.filterChange.add(handler);
+  }
+
+  #callHandlers(handlersName) {
+    this.#handlers[handlersName].forEach((handler) => handler());
   }
 }
