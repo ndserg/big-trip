@@ -1,16 +1,12 @@
 import TripEventComponen from '../components/trip-event';
 import EventFormComponent from '../components/event-form';
+import { Mode, ActionTypes } from '../const';
 import {
   render,
   replace,
   remove,
   RenderPosition,
 } from '../utils/render';
-
-export const Mode = {
-  DEFAULT: 'default',
-  EDIT: 'edit',
-};
 
 export default class TripController {
   #container = null;
@@ -40,30 +36,40 @@ export default class TripController {
     const oldPointComponent = this.#pointComponent;
     const oldEditDayComponent = this.#editDayComponent;
     this.#mode = mode;
+    const formMode = this.#mode === Mode.ADDING ? Mode.ADDING : Mode.EDIT;
 
     this.#pointComponent = new TripEventComponen(point);
-    this.#editDayComponent = new EventFormComponent(point, offers, destinations, Mode.EDIT);
+    this.#editDayComponent = new EventFormComponent(point, offers, destinations, formMode);
 
     this.#pointComponent.setRollupButtonClickHandler(() => {
       this.#replaceEventToEditForm();
     });
 
-    this.#editDayComponent.setRollupButtonClickHandler((evt) => {
+    this.#editDayComponent.setButtonsClickHandler((evt) => {
       evt.preventDefault();
       const btn = evt.target;
 
       switch (true) {
         case btn.classList.contains('event__save-btn'):
+          this.#onDataChange(this, point, this.#editDayComponent.getData(), this.#mode, ActionTypes.SAVE);
           this.#replaceEditFormToEvent();
           break;
         case btn.classList.contains('event__reset-btn'):
-          this.#replaceEditFormToEvent();
+          if (this.#mode === Mode.ADDING) {
+            this.destroy();
+            this.#onDataChange(this, null, null, this.#mode, ActionTypes.TOGGLE);
+          } else {
+            this.#onDataChange(this, point, null, this.#mode, ActionTypes.DELETE);
+            this.#replaceEditFormToEvent();
+          }
           break;
         case btn.classList.contains('event__rollup-btn'):
+          this.#mode = Mode.EDIT;
+          this.#onDataChange(this, point, point, this.#mode, ActionTypes.TOGGLE);
           this.#replaceEditFormToEvent();
           break;
         case btn.closest('label')?.classList.contains('event__favorite-btn'):
-          this.#onDataChange(this, point, { ...point, is_favorite: !point.is_favorite }, this.#mode);
+          this.#onDataChange(this, point, { ...point, is_favorite: !point.is_favorite }, this.#mode, ActionTypes.SET);
           break;
         default:
         // do nothing
@@ -87,6 +93,14 @@ export default class TripController {
           render(this.#container, this.#editDayComponent, RenderPosition.BEFOREEND);
         }
         break;
+      case Mode.ADDING:
+        if (oldPointComponent && oldEditDayComponent) {
+          remove(oldPointComponent);
+          remove(oldEditDayComponent);
+        } else {
+          render(this.#container, this.#editDayComponent, RenderPosition.AFTERBEGIN);
+        }
+        break;
       default:
       // do nothig
     }
@@ -107,6 +121,7 @@ export default class TripController {
     this.#editDayComponent.reset();
 
     if (document.contains(this.#editDayComponent.getElement())) {
+      this.#editDayComponent.destroyFlatpickr();
       replace(this.#pointComponent, this.#editDayComponent);
     }
 
@@ -115,7 +130,9 @@ export default class TripController {
 
   #replaceEventToEditForm() {
     this.#onViewChange();
-    replace(this.#editDayComponent, this.#pointComponent);
     this.#mode = Mode.EDIT;
+
+    replace(this.#editDayComponent, this.#pointComponent);
+    this.#editDayComponent.applyFlatpickr();
   }
 }

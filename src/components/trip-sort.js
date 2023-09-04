@@ -1,15 +1,5 @@
-import AbstractComponent from './abstract-component';
-
-export const SortType = {
-  EVENT: 'event',
-  TIME: 'time',
-  PRICE: 'price',
-};
-
-export const SortDirections = {
-  INCREASE: 'increase',
-  DECREASE: 'decrease',
-};
+import AbstractSmartComponent from './abstract-smart-component';
+import { SortDirections, SortType } from '../const';
 
 const toggleDirection = (direction) => {
   let newDirection = '';
@@ -23,12 +13,12 @@ const toggleDirection = (direction) => {
   return newDirection;
 };
 
-const createTripSortItemTemplate = (name, idx) => {
+const createTripSortItemTemplate = (name, sortType, sortDirection) => {
   const isTypeEvent = name === 'event';
-  const isChecked = idx === 1 ? 'checked' : '';
+  const isChecked = sortType === name ? 'checked' : '';
 
   const activeButtonClass = isChecked ? ' trip-sort__btn--active' : '';
-  const buttonDirectionClass = isTypeEvent ? '' : ' trip-sort__btn--by-increase';
+  const buttonDirectionClass = isTypeEvent ? '' : ` trip-sort__btn--by-${sortDirection}`;
   const isCheckedButtonIcon = isChecked ? 'style="display:initial"' : '';
 
   const tripSortDirectionIcon = isTypeEvent ? '' : `
@@ -39,13 +29,13 @@ const createTripSortItemTemplate = (name, idx) => {
   return (
     `<div class="trip-sort__item  trip-sort__item--event">
       <input id="sort-${name}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${name}" ${isChecked}>
-      <label class="trip-sort__btn${activeButtonClass}${buttonDirectionClass}" for="sort-${name}" data-sort-event="${name}" data-sort-direction="${SortDirections.INCREASE}">${name} ${tripSortDirectionIcon}</label>
+      <label class="trip-sort__btn${activeButtonClass}${buttonDirectionClass}" for="sort-${name}" data-sort-event="${name}" data-sort-direction="${sortDirection}">${name} ${tripSortDirectionIcon}</label>
     </div>
     `);
 };
 
-const createTripSortTemplate = (sortEvents) => {
-  const tripSortItems = sortEvents.map((sortEvent, idx) => createTripSortItemTemplate(sortEvent, idx)).join('\n');
+const createTripSortTemplate = (sortEvents, sortType, sortDirection) => {
+  const tripSortItems = sortEvents.map((sortEvent) => createTripSortItemTemplate(sortEvent, sortType, sortDirection)).join('\n');
 
   return (
     `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
@@ -56,12 +46,14 @@ const createTripSortTemplate = (sortEvents) => {
   `);
 };
 
-export default class extends AbstractComponent {
+export default class extends AbstractSmartComponent {
   #sortEvents = null;
 
   #currenSortType;
 
   #currentSortDirection;
+
+  #sortTypeChangeHandler;
 
   constructor(SORT_EVENTS) {
     super();
@@ -69,10 +61,20 @@ export default class extends AbstractComponent {
     this.#sortEvents = SORT_EVENTS;
     this.#currenSortType = SortType.EVENT;
     this.#currentSortDirection = SortDirections.INCREASE;
+
+    this.#sortTypeChangeHandler = null;
   }
 
   getTemplate() {
-    return createTripSortTemplate(this.#sortEvents);
+    return createTripSortTemplate(this.#sortEvents, this.#currenSortType, this.#currentSortDirection);
+  }
+
+  recoveryListeners() {
+    this.setSortTypeChangeHandler(this.#sortTypeChangeHandler);
+  }
+
+  rerender() {
+    super.rerender();
   }
 
   setSortTypeChangeHandler(handler) {
@@ -90,11 +92,20 @@ export default class extends AbstractComponent {
         return;
       }
 
+      if (this.#currenSortType !== sortEvent) {
+        this.#currentSortDirection = SortDirections.INCREASE;
+      } else {
+        this.#currentSortDirection = toggleDirection(sortDirection);
+      }
+
       this.#currenSortType = sortEvent;
-      this.#currentSortDirection = toggleDirection(sortDirection);
       element.dataset.sortDirection = this.#currentSortDirection;
 
+      this.#sortTypeChangeHandler = handler;
+
       handler(this.#currenSortType, this.#currentSortDirection);
+
+      this.rerender();
     });
   }
 }

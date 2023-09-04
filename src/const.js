@@ -8,6 +8,17 @@ const FilterType = {
 
 const SORT_EVENTS = ['event', 'time', 'price'];
 
+const SortType = {
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+};
+
+const SortDirections = {
+  INCREASE: 'increase',
+  DECREASE: 'decrease',
+};
+
 const TABS = ['Table', 'Stats'];
 
 const EVENT_TYPES = {
@@ -71,12 +82,29 @@ const DatesRange = {
   date_to: 'date_to',
 };
 
+const Mode = {
+  DEFAULT: 'default',
+  EDIT: 'edit',
+  ADDING: 'adding',
+};
+
+const ActionTypes = {
+  SAVE: 'save',
+  DELETE: 'delete',
+  TOGGLE: 'toggle',
+  SET: 'set',
+};
+
 export {
   MONTHS,
   FilterType,
   SORT_EVENTS,
+  SortType,
+  SortDirections,
   TABS,
   EVENT_TYPES,
   OFFERS_TYPES,
   DatesRange,
+  Mode,
+  ActionTypes,
 };

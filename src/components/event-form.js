@@ -2,7 +2,12 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import AbstractSmartComponent from './abstract-smart-component';
 import { getEventTimes, getPointOffers } from '../utils/common';
-import { OFFERS_TYPES, EVENT_TYPES, DatesRange } from '../const';
+import {
+  OFFERS_TYPES,
+  EVENT_TYPES,
+  DatesRange,
+  Mode,
+} from '../const';
 
 const getFormattedDate = (date) => {
   const currentDate = new Date(date);
@@ -31,18 +36,20 @@ const createEditModeTemplate = (isFavorite) => {
     `);
 };
 
-const createEventItemTemplate = (name) => {
+const createEventItemTemplate = (name, pointType) => {
+  const isChecked = pointType === name ? 'checked' : '';
+
   return (
     `<div class="event__type-item">
-      <input id="event-type-${name}-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="${name}">
+      <input id="event-type-${name}-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="${name}" ${isChecked}>
       <label class="event__type-label event__type-label--${name}" for="event-type-${name}-1">${name}</label>
     </div>
     `);
 };
 
-const createEventTypeListTemplate = () => {
-  const transferEvents = EVENT_TYPES.transfer.map((name) => createEventItemTemplate(name)).join('\n');
-  const activityEvents = EVENT_TYPES.activity.map((name) => createEventItemTemplate(name)).join('\n');
+const createEventTypeListTemplate = (pointType) => {
+  const transferEvents = EVENT_TYPES.transfer.map((name) => createEventItemTemplate(name, pointType)).join('\n');
+  const activityEvents = EVENT_TYPES.activity.map((name) => createEventItemTemplate(name, pointType)).join('\n');
 
   return (
     `<div class="event__type-list">
@@ -112,7 +119,9 @@ const createOffersContainerTemplate = (point, offers) => {
 };
 
 const createEventFormTemplate = (point, offers, destinations, mode) => {
-  const isEditMode = mode === 'edit';
+  const isEditMode = mode === Mode.EDIT;
+  const isAddingMode = mode === Mode.ADDING;
+
   const typePreposition = EVENT_TYPES.transfer.includes(point.type) ? 'to' : 'in';
   const dateFrom = getFormattedDate(point.date_from);
   const dateTo = getFormattedDate(point.date_to);
@@ -126,13 +135,15 @@ const createEventFormTemplate = (point, offers, destinations, mode) => {
   const editModeTemplate = isEditMode ? createEditModeTemplate(point.is_favorite) : '';
 
   const destinationsTemplate = destinations.map((destination) => createDestinationTemplate(destination.name)).join('\n');
-  const eventTypeList = createEventTypeListTemplate();
+  const eventTypeList = createEventTypeListTemplate(point.type);
 
   const offersTemplate = offers.length !== 0 ? createOffersContainerTemplate(point, offers) : '';
 
   return (
-    `<li class="trip-events__item">
-      <form class="${isEditMode ? '' : 'trip-events__item '}event event--edit" action="#" method="post">
+    `${isAddingMode
+      ? `<form class="${isEditMode ? '' : 'trip-events__item '}event event--edit" action="#" method="post">`
+      : `<li class="trip-events__item"><form class="${isEditMode ? '' : 'trip-events__item '}event event--edit" action="#" method="post">`}
+
         <header class="event__header">
           <div class="event__type-wrapper">
             <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -180,8 +191,8 @@ const createEventFormTemplate = (point, offers, destinations, mode) => {
           ${editModeTemplate}
         </header>
           ${offersTemplate}
-      </form>
-    </li>
+
+    ${isAddingMode ? '</form>' : '</form></li>'}
   `);
 };
 
@@ -194,7 +205,7 @@ export default class EventForm extends AbstractSmartComponent {
 
   #mode;
 
-  #rollupButtonClickHandler;
+  #buttonsClickHandler;
 
   #currentPoint;
 
@@ -215,6 +226,7 @@ export default class EventForm extends AbstractSmartComponent {
     this.#offers = offers;
     this.#destinations = destinations;
     this.#currentPoint = {
+      id: point.id,
       type: point.type,
       destination: point.destination,
       date_from: point.date_from,
@@ -224,8 +236,8 @@ export default class EventForm extends AbstractSmartComponent {
       is_favorite: point.is_favorite,
     };
     this.#pointOffers = getPointOffers(this.#currentPoint.type, this.#offers);
-    this.#mode = mode || 'add';
-    this.#rollupButtonClickHandler = null;
+    this.#mode = mode || Mode.ADDING;
+    this.#buttonsClickHandler = null;
 
     this.#selecetdDateFrom = this.#currentPoint.date_from;
     this.#selecetdDateTo = this.#currentPoint.date_to;
@@ -233,7 +245,7 @@ export default class EventForm extends AbstractSmartComponent {
     this.#flatpickrDateFrom = null;
     this.#flatpickrDateTo = null;
 
-    this.#applyFlatpickr();
+    // this.#applyFlatpickr();
     this.subscribeOnEvents();
   }
 
@@ -242,20 +254,21 @@ export default class EventForm extends AbstractSmartComponent {
   }
 
   recoveryListeners() {
-    this.setRollupButtonClickHandler(this.#rollupButtonClickHandler);
+    this.setButtonsClickHandler(this.#buttonsClickHandler);
     this.subscribeOnEvents();
   }
 
   rerender() {
     super.rerender();
 
-    this.#applyFlatpickr();
+    this.applyFlatpickr();
   }
 
   reset() {
     const point = this.#point;
 
     this.#currentPoint = {
+      id: point.id,
       type: point.type,
       destination: point.destination,
       date_from: point.date_from,
@@ -266,6 +279,10 @@ export default class EventForm extends AbstractSmartComponent {
     };
 
     this.rerender();
+  }
+
+  getData() {
+    return this.#currentPoint;
   }
 
   #setSelectedDate = ([date], instance) => {
@@ -280,12 +297,17 @@ export default class EventForm extends AbstractSmartComponent {
     }
   };
 
-  #applyFlatpickr() {
+  destroyFlatpickr() {
+    this.#flatpickrDateFrom.destroy();
+    this.#flatpickrDateTo.destroy();
+    this.#flatpickrDateFrom = null;
+    this.#flatpickrDateTo = null;
+    document.querySelectorAll('.flatpickr-calendar').forEach((item) => item.remove());
+  }
+
+  applyFlatpickr() {
     if (this.#flatpickrDateFrom) {
-      this.#flatpickrDateFrom.destroy();
-      this.#flatpickrDateTo.destroy();
-      this.#flatpickrDateFrom = null;
-      this.#flatpickrDateTo = null;
+      this.destroyFlatpickr();
     }
 
     const dateFromElement = this.getElement().querySelector('input[name="event-start-time"]');
@@ -299,7 +321,10 @@ export default class EventForm extends AbstractSmartComponent {
       altFormat: 'd/m/y H:i',
       minDate: this.#selecetdDateFrom,
       defaultDate: this.#selecetdDateTo,
-      onChange: (selectedDates) => this.#setSelectedDate(selectedDates, DatesRange.date_to),
+      onChange: (selectedDates) => {
+        this.#setSelectedDate(selectedDates, DatesRange.date_to);
+        this.#currentPoint.date_to = selectedDates[0].toISOString();
+      },
     });
 
     this.#flatpickrDateFrom = flatpickr(dateFromElement, {
@@ -312,6 +337,7 @@ export default class EventForm extends AbstractSmartComponent {
       onChange: (selectedDates) => {
         this.#setSelectedDate(selectedDates, DatesRange.date_from);
         this.#flatpickrDateTo.set('minDate', this.#selecetdDateFrom);
+        this.#currentPoint.date_from = selectedDates[0].toISOString();
       },
     });
   }
@@ -364,12 +390,13 @@ export default class EventForm extends AbstractSmartComponent {
     });
 
     destinationsInput.addEventListener('change', (evt) => {
-      this.#currentPoint.destination.name = evt.target.value;
+      const destination = this.#destinations.find((item) => item.name === evt.target.value);
+      this.#currentPoint.destination = destination;
       this.rerender();
     });
 
     priceInput.addEventListener('change', (evt) => {
-      this.#currentPoint.base_price = evt.target.value;
+      this.#currentPoint.base_price = Number(evt.target.value);
       this.rerender();
     });
 
@@ -387,8 +414,8 @@ export default class EventForm extends AbstractSmartComponent {
     }
   }
 
-  setRollupButtonClickHandler(handler) {
+  setButtonsClickHandler(handler) {
     this.getElement().firstElementChild.addEventListener('click', handler);
-    this.#rollupButtonClickHandler = handler;
+    this.#buttonsClickHandler = handler;
   }
 }

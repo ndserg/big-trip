@@ -8,9 +8,21 @@ const getBorderPoints = (points) => {
   };
 };
 
+const calculateAdditionalPrice = (offers) => {
+  return offers.reduce((acc, cur) => {
+    return acc + cur.price;
+  }, 0);
+};
+
 const calculatePrice = (points) => {
   return points.reduce((acc, cur) => {
-    return acc + cur.base_price;
+    let offersPrice = 0;
+
+    if (cur.offers.length > 0) {
+      offersPrice = calculateAdditionalPrice(cur.offers);
+    }
+
+    return acc + cur.base_price + offersPrice;
   }, 0);
 };
 

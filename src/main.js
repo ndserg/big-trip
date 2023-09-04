@@ -4,21 +4,26 @@ import FilterController from './controllers/FilterController';
 import MainContainer from './components/main-container';
 import TripTabsComponent from './components/trip-tabs';
 import LoadingComponent from './components/loading';
+import AddPointButtonComponent from './components/add-point-button';
 import { TABS } from './const';
 import { render, RenderPosition } from './utils/render';
 import { getPoints, getOffers, getDestinations } from './components/api-service';
 
+const pageMain = document.querySelector('.page-main');
 const tripMainContainer = document.querySelector('.trip-main');
 const tripControlsContainer = tripMainContainer.querySelector('.trip-controls');
-const pageMain = document.querySelector('.page-main');
+
 const mainContainerComponent = new MainContainer();
 const loadingComponent = new LoadingComponent();
 const pointsModel = new PointsModel();
 const filterController = new FilterController(tripControlsContainer, pointsModel);
+const tripTabsComponent = new TripTabsComponent(TABS);
+const addPointButtonComponent = new AddPointButtonComponent();
 
 const mainContainerElement = mainContainerComponent.getElement();
 
-render(tripControlsContainer, new TripTabsComponent(TABS), RenderPosition.AFTERBEGIN);
+render(tripMainContainer, addPointButtonComponent, RenderPosition.BEFOREEND);
+render(tripControlsContainer, tripTabsComponent, RenderPosition.AFTERBEGIN);
 filterController.render();
 
 render(pageMain, mainContainerComponent, RenderPosition.AFTERBEGIN);
@@ -35,6 +40,10 @@ const initApp = (points, offers, destinations) => {
   loadingComponent.removeElement();
 
   tripController.render();
+
+  addPointButtonComponent.setAddButtonClickHandler((evt) => {
+    tripController.createPoint(evt.target);
+  });
 };
 
 const loadData = () => {
