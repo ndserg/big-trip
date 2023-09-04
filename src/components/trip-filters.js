@@ -1,18 +1,18 @@
 import AbstractComponent from './abstract-component';
 
-const createTripFilterTemplate = (name, idx) => {
-  const isChecked = idx === 0 ? 'checked' : '';
+const createTripFilterTemplate = ({ name, checked }) => {
+  const isChecked = checked ? 'checked' : '';
 
   return (
     `<div class="trip-filters__filter">
       <input id="filter-${name}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${name}" ${isChecked}>
-      <label class="trip-filters__filter-label" for="filter-${name}">${name}</label>
+      <label class="trip-filters__filter-label" for="filter-${name}" data-filter-type="${name}">${name}</label>
     </div>
   `);
 };
 
 const createTripFiltersTemplate = (filterTypes) => {
-  const filters = filterTypes.map((filter, idx) => createTripFilterTemplate(filter, idx)).join('\n');
+  const filters = filterTypes.map((filter) => createTripFilterTemplate(filter)).join('\n');
 
   return (
     `<div>
@@ -26,15 +26,25 @@ const createTripFiltersTemplate = (filterTypes) => {
 };
 
 export default class TripFilters extends AbstractComponent {
-  #filterTypes = null;
+  #filters = [];
 
-  constructor(FLITER_TYPES) {
+  constructor(filters) {
     super();
 
-    this.#filterTypes = FLITER_TYPES;
+    this.#filters = filters;
   }
 
   getTemplate() {
-    return createTripFiltersTemplate(this.#filterTypes);
+    return createTripFiltersTemplate(this.#filters);
+  }
+
+  setFilterChangeHandler(handler) {
+    this.getElement().addEventListener('click', (evt) => {
+      evt.preventDefault();
+
+      if (evt.target.tagName === 'LABEL') {
+        handler(evt.target.dataset.filterType);
+      }
+    });
   }
 }

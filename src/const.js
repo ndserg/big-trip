@@ -1,6 +1,10 @@
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEC'];
 
-const FLITER_TYPES = ['everything', 'future', 'past'];
+const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PAST: 'past',
+};
 
 const SORT_EVENTS = ['event', 'time', 'price'];
 
@@ -69,7 +73,7 @@ const DatesRange = {
 
 export {
   MONTHS,
-  FLITER_TYPES,
+  FilterType,
   SORT_EVENTS,
   TABS,
   EVENT_TYPES,
