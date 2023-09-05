@@ -1,39 +1,32 @@
-import PointController, { Mode as PointControllerMode } from './PointController';
+import PointController from './PointController';
 import TripEventsComponent from '../components/trip-events';
 import TripDayEventsComponent from '../components/trip-day-events';
 import TripInfoComponent from '../components/trip-info';
-import TripSortComponent, { SortType, SortDirections } from '../components/trip-sort';
+import TripSortComponent from '../components/trip-sort';
 import TripDaysComponent from '../components/trip-days';
 import TripDayComponent from '../components/trip-day';
 import NoPointsComponent from '../components/no-points';
-import { SORT_EVENTS } from '../const';
-import { getGroupedPoints } from '../utils/common';
+import {
+  SORT_EVENTS,
+  SortType,
+  Mode as PointControllerMode,
+  ActionTypes,
+} from '../const';
 import { render, remove, RenderPosition } from '../utils/render';
 
-export const getSortedPoints = (points, sortType, sortDirection) => {
-  let sortedPoints = [];
-
-  switch (sortType) {
-    case SortType.TIME:
-      if (sortDirection === SortDirections.DECREASE) {
-        sortedPoints.push(points.slice().sort((a, b) => new Date(b.date_from) - new Date(a.date_from)));
-      } else {
-        sortedPoints.push(points.slice().sort((a, b) => new Date(a.date_from) - new Date(b.date_from)));
-      }
-      break;
-    case SortType.PRICE:
-      if (sortDirection === SortDirections.DECREASE) {
-        sortedPoints.push(points.slice().sort((a, b) => b.base_price - a.base_price));
-      } else {
-        sortedPoints.push(points.slice().sort((a, b) => a.base_price - b.base_price));
-      }
-      break;
-    default:
-      sortedPoints = getGroupedPoints(points);
-      break;
-  }
-
-  return sortedPoints;
+const EpmtyPoint = {
+  id: '',
+  type: 'bus',
+  destination: {
+    name: '',
+    description: '',
+    pictures: [],
+  },
+  date_from: new Date().toISOString(),
+  date_to: new Date().toISOString(),
+  base_price: 0,
+  offers: [],
+  is_favorite: false,
 };
 
 export default class TripController {
@@ -63,6 +56,10 @@ export default class TripController {
 
   #showedTripDayEventsComponents;
 
+  #creatingPoint;
+
+  #creatingButtonComponent;
+
   constructor(container, pointsModel) {
     this.#container = container;
     this.#pointsModel = pointsModel;
@@ -80,6 +77,9 @@ export default class TripController {
     this.#tripDaysComponent = null;
     this.#noPointsComponent = null;
     this.#tripSortComponent = null;
+
+    this.#creatingPoint = null;
+    this.#creatingButtonComponent = null;
 
     this.#pointsModel.setFilterChangeHandler(this.#onFilterChange);
   }
@@ -101,27 +101,30 @@ export default class TripController {
     this.#tripDaysComponent = new TripDaysComponent();
     this.#noPointsComponent = new NoPointsComponent();
     this.#tripSortComponent = new TripSortComponent(SORT_EVENTS);
-    this.#tripInfoComponent = new TripInfoComponent(this.#points);
+    this.#tripInfoComponent = new TripInfoComponent(this.#points.length > 0 ? this.#points : [EpmtyPoint]);
+
+    const tripMainContainer = document.querySelector('.trip-main');
+    render(tripMainContainer, this.#tripInfoComponent, RenderPosition.AFTERBEGIN);
+    render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
 
     if (this.#points.length === 0) {
-      render(this.#container.getElement(), this.#noPointsComponent, RenderPosition.AFTERBEGIN);
+      render(this.#eventsComponent.getElement(), this.#noPointsComponent, RenderPosition.BEFOREEND);
       return;
     }
 
-    const tripMainContainer = document.querySelector('.trip-main');
-    const groupedPoints = getGroupedPoints(this.#points);
+    const groupedPoints = this.#pointsModel.getGroupedPoints();
 
     groupedPoints.map((pointsByDay, idx) => this.#renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, SortType.EVENT));
 
-    render(tripMainContainer, this.#tripInfoComponent, RenderPosition.AFTERBEGIN);
-    render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
     render(this.#eventsComponent.getElement(), this.#tripSortComponent, RenderPosition.BEFOREEND);
     render(this.#eventsComponent.getElement(), this.#tripDaysComponent, RenderPosition.BEFOREEND);
 
     this.#tripSortComponent.setSortTypeChangeHandler((sortType, sortDirection) => {
-      const sortedPoints = getSortedPoints(this.#points, sortType, sortDirection);
+      const currentSortedPoints = this.#pointsModel.getSortedPoints(sortType, sortDirection);
+      const sortedGroupedPoints = this.#pointsModel.getGroupedPoints(currentSortedPoints);
+
       this.#tripDaysComponent.getElement().innerHTML = '';
-      sortedPoints.map((pointsByDay, idx) => this.#renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, sortType));
+      sortedGroupedPoints.map((pointsByDay, idx) => this.#renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, sortType));
     });
   }
 
@@ -156,11 +159,59 @@ export default class TripController {
     this.render();
   }
 
-  #onDataChange = (pointController, oldPoint, newPoint, mode) => {
-    const isSuccess = this.#pointsModel.updatePoint(oldPoint.id, newPoint);
+  createPoint(component) {
+    if (this.#creatingPoint) {
+      return;
+    }
 
-    if (isSuccess) {
-      pointController.render(newPoint, this.#offers, this.#destinations, mode);
+    if (this.#points.length === 0) {
+      this.#eventsComponent = new TripEventsComponent();
+      render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
+    }
+
+    this.#creatingButtonComponent = component;
+    this.#creatingButtonComponent.disabled = true;
+
+    this.#creatingPoint = new PointController(this.#eventsComponent.getElement(), this.#onDataChange, this.#onViewChange);
+    this.#creatingPoint.render(EpmtyPoint, this.#offers, this.#destinations, PointControllerMode.ADDING);
+  }
+
+  #onDataChange = (pointController, oldPoint, newPoint, mode, action) => {
+    if (action === ActionTypes.DELETE) {
+      const isDeleted = this.#pointsModel.removePoint(oldPoint.id);
+
+      if (isDeleted) {
+        this.#updatePoints();
+      }
+    } else if (action === ActionTypes.SAVE) {
+      if (mode === PointControllerMode.ADDING) {
+        const isAdded = this.#pointsModel.addPoint(newPoint);
+
+        if (isAdded) {
+          this.#creatingPoint = null;
+          this.#creatingButtonComponent.disabled = false;
+          this.#updatePoints();
+        }
+      } else {
+        const isUpdated = this.#pointsModel.updatePoint(oldPoint.id, newPoint);
+
+        if (isUpdated) {
+          this.#updatePoints();
+        }
+      }
+    } else if (action === ActionTypes.SET) {
+      const isUpdated = this.#pointsModel.updatePoint(oldPoint.id, newPoint);
+
+      if (isUpdated) {
+        pointController.render(newPoint, this.#offers, this.#destinations, mode);
+      }
+    } else if (action === ActionTypes.TOGGLE) {
+      if (mode === PointControllerMode.ADDING) {
+        this.#creatingPoint = null;
+        this.#creatingButtonComponent.disabled = false;
+      } else {
+        pointController.render(newPoint, this.#offers, this.#destinations, mode);
+      }
     }
   };
 

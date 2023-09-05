@@ -1,16 +1,21 @@
 import AbstractComponent from './abstract-component';
 import { MONTHS } from '../const';
 
-const getBorderPoints = (points) => {
-  return {
-    firstPoint: points[0],
-    lastPoint: points[points.length - 1],
-  };
+const calculateAdditionalPrice = (offers) => {
+  return offers.reduce((acc, cur) => {
+    return acc + cur.price;
+  }, 0);
 };
 
 const calculatePrice = (points) => {
   return points.reduce((acc, cur) => {
-    return acc + cur.base_price;
+    let offersPrice = 0;
+
+    if (cur.offers.length > 0) {
+      offersPrice = calculateAdditionalPrice(cur.offers);
+    }
+
+    return acc + cur.base_price + offersPrice;
   }, 0);
 };
 
@@ -38,9 +43,9 @@ const createTripCitiesTemplate = (points) => {
   return tripCitiesString;
 };
 
-const getTripDates = (points) => {
-  const dateFrom = new Date(points.firstPoint.date_from);
-  const dateTo = new Date(points.lastPoint.date_from);
+const getTripDates = ([from, to]) => {
+  const dateFrom = new Date(from);
+  const dateTo = new Date(to);
   const dayFrom = dateFrom.getDate();
   const dayTo = dateTo.getDate();
   const monthFrom = MONTHS[dateFrom.getMonth()];
@@ -55,12 +60,14 @@ const getTripDates = (points) => {
 };
 
 const createTripInfoTemplate = (points) => {
+  const borderDates = points.length === 1 ? [points[0].date_from, points[0].date_to] : [points[0].date_from, points[points.length - 1].date_to];
+
   const {
     dayFrom,
     dayTo,
     monthFrom,
     monthTo,
-  } = getTripDates(getBorderPoints(points));
+  } = getTripDates(borderDates);
 
   const tripCities = createTripCitiesTemplate(points);
 

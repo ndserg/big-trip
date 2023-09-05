@@ -1,22 +1,3 @@
-export const getGroupedPoints = (points) => {
-  let dayIdx = 0;
-  let currentDate = '';
-  const groupedPoints = [];
-
-  points.slice().forEach((point) => {
-    const currentPointDate = new Date(point.date_from);
-    if (currentPointDate.toLocaleDateString() === currentDate) {
-      groupedPoints[dayIdx - 1].push(point);
-    } else {
-      currentDate = currentPointDate.toLocaleDateString();
-      groupedPoints.push([point]);
-      dayIdx += 1;
-    }
-  });
-
-  return groupedPoints;
-};
-
 export const addLeadingZero = (num) => {
   return num < 10 ? `0${num}` : num;
 };
@@ -54,6 +35,31 @@ export const getEventTimes = (from, to) => {
   };
 };
 
-export const getPointOffers = (pointType, offers) => {
-  return offers.find((currentOffers) => currentOffers.type === pointType) || { type: pointType, offers: [] };
+export const getPointTypeOffers = (pointType, offers) => {
+  const pointTypeOffers = offers.find((currentOffers) => currentOffers.type === pointType) || { type: pointType, offers: [] };
+  return pointTypeOffers;
+};
+
+export const getPointOffers = (pointOffers, pointType, allOffers) => {
+  const pointTypeOffers = getPointTypeOffers(pointType, allOffers);
+  const onlyPointOffers = pointOffers.reduce((acc, cur) => {
+    const item = pointTypeOffers.offers.find((offer) => offer.id === cur);
+    acc.push(item);
+    return acc;
+  }, []);
+  return onlyPointOffers;
+};
+
+export const getPointDestination = (destinationId, destinations) => {
+  return destinations.find((item) => item.id === destinationId);
+};
+
+export const transformRawToPoint = (points, offers, destinations) => {
+  return points.map((point) => {
+    return {
+      ...point,
+      destination: getPointDestination(point.destination, destinations),
+      offers: getPointOffers(point.offers, point.type, offers),
+    };
+  });
 };
