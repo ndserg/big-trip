@@ -16,10 +16,14 @@ import { render, remove, RenderPosition } from '../utils/render';
 
 const EpmtyPoint = {
   id: '',
-  type: 'flight',
-  destination: { name: '' },
-  date_from: new Date(),
-  date_to: new Date(),
+  type: 'bus',
+  destination: {
+    name: '',
+    description: '',
+    pictures: [],
+  },
+  date_from: new Date().toISOString(),
+  date_to: new Date().toISOString(),
   base_price: 0,
   offers: [],
   is_favorite: false,
@@ -97,20 +101,21 @@ export default class TripController {
     this.#tripDaysComponent = new TripDaysComponent();
     this.#noPointsComponent = new NoPointsComponent();
     this.#tripSortComponent = new TripSortComponent(SORT_EVENTS);
-    this.#tripInfoComponent = new TripInfoComponent(this.#points);
+    this.#tripInfoComponent = new TripInfoComponent(this.#points.length > 0 ? this.#points : [EpmtyPoint]);
+
+    const tripMainContainer = document.querySelector('.trip-main');
+    render(tripMainContainer, this.#tripInfoComponent, RenderPosition.AFTERBEGIN);
+    render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
 
     if (this.#points.length === 0) {
-      render(this.#container.getElement(), this.#noPointsComponent, RenderPosition.AFTERBEGIN);
+      render(this.#eventsComponent.getElement(), this.#noPointsComponent, RenderPosition.BEFOREEND);
       return;
     }
 
-    const tripMainContainer = document.querySelector('.trip-main');
     const groupedPoints = this.#pointsModel.getGroupedPoints();
 
     groupedPoints.map((pointsByDay, idx) => this.#renderDay(this.#tripDaysComponent.getElement(), pointsByDay, idx, SortType.EVENT));
 
-    render(tripMainContainer, this.#tripInfoComponent, RenderPosition.AFTERBEGIN);
-    render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
     render(this.#eventsComponent.getElement(), this.#tripSortComponent, RenderPosition.BEFOREEND);
     render(this.#eventsComponent.getElement(), this.#tripDaysComponent, RenderPosition.BEFOREEND);
 
@@ -157,6 +162,11 @@ export default class TripController {
   createPoint(component) {
     if (this.#creatingPoint) {
       return;
+    }
+
+    if (this.#points.length === 0) {
+      this.#eventsComponent = new TripEventsComponent();
+      render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
     }
 
     this.#creatingButtonComponent = component;

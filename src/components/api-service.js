@@ -1,5 +1,5 @@
 const AUTORIZATION = 'Basic u4mtv8m3498tmiemgbe74';
-const END_POINT = 'https://16.ecmascript.pages.academy/big-trip';
+const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
 
 const checkStatus = (response) => {
   if (!response.ok) {

@@ -38,7 +38,7 @@ export default class TripController {
     this.#mode = mode;
     const formMode = this.#mode === Mode.ADDING ? Mode.ADDING : Mode.EDIT;
 
-    this.#pointComponent = new TripEventComponen(point);
+    this.#pointComponent = new TripEventComponen(point, offers, destinations);
     this.#editDayComponent = new EventFormComponent(point, offers, destinations, formMode);
 
     this.#pointComponent.setRollupButtonClickHandler(() => {
@@ -58,6 +58,7 @@ export default class TripController {
           if (this.#mode === Mode.ADDING) {
             this.destroy();
             this.#onDataChange(this, null, null, this.#mode, ActionTypes.TOGGLE);
+            this.#editDayComponent.destroyFlatpickr();
           } else {
             this.#onDataChange(this, point, null, this.#mode, ActionTypes.DELETE);
             this.#replaceEditFormToEvent();
@@ -89,16 +90,19 @@ export default class TripController {
         if (oldPointComponent && oldEditDayComponent) {
           replace(this.#pointComponent, oldPointComponent);
           replace(this.#editDayComponent, oldEditDayComponent);
+          this.#editDayComponent.applyFlatpickr();
         } else {
           render(this.#container, this.#editDayComponent, RenderPosition.BEFOREEND);
         }
         break;
       case Mode.ADDING:
+        this.#onViewChange();
         if (oldPointComponent && oldEditDayComponent) {
           remove(oldPointComponent);
           remove(oldEditDayComponent);
         } else {
           render(this.#container, this.#editDayComponent, RenderPosition.AFTERBEGIN);
+          this.#editDayComponent.applyFlatpickr();
         }
         break;
       default:

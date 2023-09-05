@@ -7,6 +7,7 @@ import LoadingComponent from './components/loading';
 import AddPointButtonComponent from './components/add-point-button';
 import { TABS } from './const';
 import { render, RenderPosition } from './utils/render';
+import { transformRawToPoint } from './utils/common';
 import { getPoints, getOffers, getDestinations } from './components/api-service';
 
 const pageMain = document.querySelector('.page-main');
@@ -30,7 +31,7 @@ render(pageMain, mainContainerComponent, RenderPosition.AFTERBEGIN);
 render(mainContainerElement, loadingComponent, RenderPosition.BEFOREEND);
 
 const initApp = (points, offers, destinations) => {
-  pointsModel.points = points;
+  pointsModel.points = transformRawToPoint(points, offers, destinations);
   pointsModel.offers = offers;
   pointsModel.destinations = destinations;
 

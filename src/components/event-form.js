@@ -1,7 +1,7 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import AbstractSmartComponent from './abstract-smart-component';
-import { getEventTimes, getPointOffers } from '../utils/common';
+import { getEventTimes, getPointTypeOffers } from '../utils/common';
 import {
   OFFERS_TYPES,
   EVENT_TYPES,
@@ -11,6 +11,7 @@ import {
 
 const getFormattedDate = (date) => {
   const currentDate = new Date(date);
+
   return currentDate.toLocaleDateString()
     .split('.')
     .reverse()
@@ -89,7 +90,30 @@ const createOfferTemplate = (offer, offerName, isSelected) => {
   `);
 };
 
-const createOffersContainerTemplate = (point, offers) => {
+const createDestinationDescriptionTemplate = (destination) => {
+  if (!destination.name) {
+    return '';
+  }
+
+  const { description, pictures } = destination;
+
+  const picturesTemplate = pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('\n');
+
+  return (
+    `<section class="event__section  event__section--destination">
+      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+      <p class="event__destination-description">${description}</p>
+
+      <div class="event__photos-container">
+        <div class="event__photos-tape">
+          ${picturesTemplate}
+        </div>
+      </div>
+    </section>
+  `);
+};
+
+const createOffersContainerTemplate = (point, offers, destination, isAddingMode) => {
   const selectedOffers = [];
   let offersTemplate = '';
 
@@ -99,6 +123,8 @@ const createOffersContainerTemplate = (point, offers) => {
       selectedOffers.push(selectedIdx);
     }
   });
+
+  const destinationTemplate = isAddingMode ? createDestinationDescriptionTemplate(destination) : '';
 
   offersTemplate = offers.map((offer, idx) => {
     const isSelected = selectedOffers.includes(idx);
@@ -114,6 +140,7 @@ const createOffersContainerTemplate = (point, offers) => {
           ${offersTemplate}
         </div>
       </section>
+        ${destinationTemplate}
     </section>
   `);
 };
@@ -137,7 +164,7 @@ const createEventFormTemplate = (point, offers, destinations, mode) => {
   const destinationsTemplate = destinations.map((destination) => createDestinationTemplate(destination.name)).join('\n');
   const eventTypeList = createEventTypeListTemplate(point.type);
 
-  const offersTemplate = offers.length !== 0 ? createOffersContainerTemplate(point, offers) : '';
+  const offersTemplate = offers.length !== 0 ? createOffersContainerTemplate(point, offers, point.destination, isAddingMode) : '';
 
   return (
     `${isAddingMode
@@ -235,7 +262,7 @@ export default class EventForm extends AbstractSmartComponent {
       offers: point.offers,
       is_favorite: point.is_favorite,
     };
-    this.#pointOffers = getPointOffers(this.#currentPoint.type, this.#offers);
+    this.#pointOffers = getPointTypeOffers(this.#currentPoint.type, this.#offers);
     this.#mode = mode || Mode.ADDING;
     this.#buttonsClickHandler = null;
 
@@ -245,7 +272,6 @@ export default class EventForm extends AbstractSmartComponent {
     this.#flatpickrDateFrom = null;
     this.#flatpickrDateTo = null;
 
-    // this.#applyFlatpickr();
     this.subscribeOnEvents();
   }
 
@@ -354,7 +380,7 @@ export default class EventForm extends AbstractSmartComponent {
     const getCheckedOffers = (offersElement) => {
       const parent = offersElement.parentElement;
       const selectedInputs = parent.querySelectorAll('input:checked');
-      const selectedIds = Array.from(selectedInputs).map((input) => Number(input.dataset.offerId));
+      const selectedIds = Array.from(selectedInputs).map((input) => input.dataset.offerId);
 
       const selectedOffers = [];
 
@@ -376,7 +402,7 @@ export default class EventForm extends AbstractSmartComponent {
 
       if (evt.target.classList?.contains('.event__type-label') === eventTypeToggleButton || evt.target.closest('.event__type-label')) {
         this.#currentPoint.type = evt.target.parentElement.querySelector('INPUT').value;
-        this.#pointOffers = getPointOffers(this.#currentPoint.type, this.#offers);
+        this.#pointOffers = getPointTypeOffers(this.#currentPoint.type, this.#offers);
         if (this.#currentPoint.type === this.#point.type) {
           this.#currentPoint.offers = this.#point.offers;
         } else {

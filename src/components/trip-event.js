@@ -68,6 +68,7 @@ export default class TripEvent extends AbstractComponent {
     super();
 
     this.#event = event;
+
     this.#rollupButtonClickHandler = null;
   }
 
