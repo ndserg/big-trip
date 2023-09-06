@@ -55,7 +55,10 @@ const switchTabs = (newActiveTab) => {
 };
 
 const onFiltersChange = () => {
-  switchTabs(Tabs.TABLE);
+  const currentTab = activeTab;
+  statisticsComponent.hide();
+  activeTab = Tabs.TABLE;
+  switchTabs(currentTab);
 };
 
 pointsModel.setFilterChangeHandler(onFiltersChange);
