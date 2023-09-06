@@ -222,50 +222,40 @@ export default class Statistics extends AbstractComponent {
   #getStatistics() {
     const points = this.#pointsModel.getFilteredPoints();
 
-    const transportsStat = points.reduce((acc, cur) => {
-      const isTransfer = EVENT_TYPES.transfer.includes(cur.type);
-
-      if (isTransfer && acc[cur.type]) {
-        acc[cur.type] += 1;
-      } else if (isTransfer) {
-        acc[cur.type] = 1;
-      }
-
-      return acc;
-    }, {});
-
     const offersTotal = (offers) => offers.reduce((acc, offer) => {
       return acc + offer.price;
     }, 0);
 
-    const moneyTotal = points.reduce((acc, cur) => {
+    const allStat = points.reduce((acc, cur) => {
       const offersSum = cur.offers.length > 0 ? offersTotal(cur.offers) : 0;
-
-      if (acc[cur.type]) {
-        acc[cur.type] += cur.base_price + offersSum;
-      } else {
-        acc[cur.type] = cur.base_price + offersSum;
-      }
-
-      return acc;
-    }, {});
-
-    const timeSpent = points.reduce((acc, cur) => {
+      const isTransfer = EVENT_TYPES.transfer.includes(cur.type);
       const isActivity = EVENT_TYPES.activity.includes(cur.type);
 
-      if (isActivity && acc[cur.type]) {
-        acc[cur.type] += getEventSpentTime(cur.date_from, cur.date_to);
+      if (acc.money[cur.type]) {
+        acc.money[cur.type] += cur.base_price + offersSum;
+      } else {
+        acc.money[cur.type] = cur.base_price + offersSum;
+      }
+
+      if (isActivity && acc.time[cur.type]) {
+        acc.time[cur.type] += getEventSpentTime(cur.date_from, cur.date_to);
       } else if (isActivity) {
-        acc[cur.type] = getEventSpentTime(cur.date_from, cur.date_to);
+        acc.time[cur.type] = getEventSpentTime(cur.date_from, cur.date_to);
+      }
+
+      if (isTransfer && acc.activity[cur.type]) {
+        acc.activity[cur.type] += 1;
+      } else if (isTransfer) {
+        acc.activity[cur.type] = 1;
       }
 
       return acc;
-    }, {});
+    }, { money: {}, activity: {}, time: {} });
 
     return {
-      money: Object.entries(moneyTotal).sort((a, b) => b[1] - a[1]),
-      activity: Object.entries(transportsStat).sort((a, b) => b[1] - a[1]),
-      time: Object.entries(timeSpent).sort((a, b) => b[1] - a[1]),
+      money: Object.entries(allStat.money).sort((a, b) => b[1] - a[1]),
+      activity: Object.entries(allStat.activity).sort((a, b) => b[1] - a[1]),
+      time: Object.entries(allStat.time).sort((a, b) => b[1] - a[1]),
     };
   }
 }
