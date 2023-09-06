@@ -222,4 +222,13 @@ export default class TripController {
   #onFilterChange = () => {
     this.#updatePoints();
   };
+
+  hide() {
+    this.#onViewChange();
+    this.#eventsComponent.hide();
+  }
+
+  show() {
+    this.#eventsComponent.show();
+  }
 }

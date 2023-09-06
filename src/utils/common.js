@@ -2,6 +2,15 @@ export const addLeadingZero = (num) => {
   return num < 10 ? `0${num}` : num;
 };
 
+export const getEventSpentTime = (from, to) => {
+  const timeFrom = new Date(from);
+  const timeTo = new Date(to);
+
+  const eventDurationHours = Math.round(((timeTo - timeFrom) / 60000) / 60);
+
+  return eventDurationHours;
+};
+
 export const getEventDuration = (from, to) => {
   let duration = '';
   const eventDurationHours = Math.floor(((to - from) / 60000) / 60);

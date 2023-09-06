@@ -19,7 +19,10 @@ const SortDirections = {
   DECREASE: 'decrease',
 };
 
-const TABS = ['Table', 'Stats'];
+const Tabs = {
+  TABLE: 'Table',
+  STATS: 'Stats',
+};
 
 const EVENT_TYPES = {
   transfer: ['flight', 'taxi', 'bus', 'train', 'ship', 'transport', 'drive'],
@@ -101,7 +104,7 @@ export {
   SORT_EVENTS,
   SortType,
   SortDirections,
-  TABS,
+  Tabs,
   EVENT_TYPES,
   OFFERS_TYPES,
   DatesRange,
