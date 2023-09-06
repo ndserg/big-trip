@@ -8,7 +8,7 @@ import {
   RenderPosition,
 } from '../utils/render';
 
-export default class TripController {
+export default class PointController {
   #container = null;
 
   #pointComponent;
@@ -96,7 +96,6 @@ export default class TripController {
         }
         break;
       case Mode.ADDING:
-        this.#onViewChange();
         if (oldPointComponent && oldEditDayComponent) {
           remove(oldPointComponent);
           remove(oldEditDayComponent);

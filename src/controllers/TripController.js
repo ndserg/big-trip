@@ -164,6 +164,8 @@ export default class TripController {
       return;
     }
 
+    this.#onViewChange();
+
     if (this.#points.length === 0) {
       this.#eventsComponent = new TripEventsComponent();
       render(this.#container.getElement(), this.#eventsComponent, RenderPosition.AFTERBEGIN);
@@ -217,6 +219,11 @@ export default class TripController {
 
   #onViewChange = () => {
     this.#showedPointControllers.forEach((pointController) => pointController.setDefaultView());
+    if (this.#creatingPoint) {
+      this.#creatingPoint.destroy();
+      this.#creatingPoint = null;
+      this.#creatingButtonComponent.disabled = false;
+    }
   };
 
   #onFilterChange = () => {

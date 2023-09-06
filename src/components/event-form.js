@@ -441,7 +441,7 @@ export default class EventForm extends AbstractSmartComponent {
   }
 
   setButtonsClickHandler(handler) {
-    this.getElement().firstElementChild.addEventListener('click', handler);
+    this.getElement().addEventListener('click', handler);
     this.#buttonsClickHandler = handler;
   }
 }
