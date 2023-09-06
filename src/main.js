@@ -8,8 +8,14 @@ import StatisticsComponent from './components/statistics';
 import AddPointButtonComponent from './components/add-point-button';
 import { Tabs } from './const';
 import { render, RenderPosition } from './utils/render';
-import { transformRawToPoint } from './utils/common';
-import { getPoints, getOffers, getDestinations } from './components/api-service';
+import API from './services/api-service';
+
+const AUTHORIZATION = 'Basic u4mtv8m3498tmiemgbe74';
+const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
+
+const pointsModel = new PointsModel();
+
+const api = new API(END_POINT, AUTHORIZATION, pointsModel);
 
 let activeTab = Tabs.TABLE;
 
@@ -19,12 +25,11 @@ const tripControlsContainer = tripMainContainer.querySelector('.trip-controls');
 
 const mainContainerComponent = new MainContainer();
 const loadingComponent = new LoadingComponent();
-const pointsModel = new PointsModel();
 const filterController = new FilterController(tripControlsContainer, pointsModel);
 const tripTabsComponent = new TripTabsComponent(Tabs, activeTab);
 const addPointButtonComponent = new AddPointButtonComponent();
 const statisticsComponent = new StatisticsComponent(pointsModel);
-const tripController = new TripController(mainContainerComponent, pointsModel);
+const tripController = new TripController(mainContainerComponent, pointsModel, api);
 
 const mainContainerElement = mainContainerComponent.getElement();
 
@@ -68,7 +73,7 @@ tripTabsComponent.setTabsChangeHandler((newActiveTab) => {
 });
 
 const initApp = (points, offers, destinations) => {
-  pointsModel.points = transformRawToPoint(points, offers, destinations);
+  pointsModel.points = points;
   pointsModel.offers = offers;
   pointsModel.destinations = destinations;
 
@@ -84,25 +89,7 @@ const initApp = (points, offers, destinations) => {
   });
 };
 
-const loadData = () => {
-  const loadPoints = getPoints().then((values) => values);
-
-  const loadOffers = getOffers().then((values) => values);
-
-  const loadDestinations = getDestinations().then((values) => values);
-
-  Promise.all([loadPoints, loadOffers, loadDestinations]).then((values) => {
-    const [points, offers, destinations] = values;
-    localStorage.points = JSON.stringify(points);
-    localStorage.offers = JSON.stringify(offers);
-    localStorage.destinations = JSON.stringify(destinations);
-
+api.getData()
+  .then(({ points, offers, destinations }) => {
     initApp(points, offers, destinations);
   });
-};
-
-if (localStorage.points && localStorage.offers && localStorage.destinations) {
-  initApp(JSON.parse(localStorage.points), JSON.parse(localStorage.offers), JSON.parse(localStorage.destinations));
-} else {
-  loadData();
-}

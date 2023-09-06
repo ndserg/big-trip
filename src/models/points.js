@@ -138,7 +138,7 @@ export default class PointsModel {
   }
 
   addPoint(point) {
-    this.#points = [].concat({ ...point, id: String(Date.now()) }, this.#points);
+    this.#points = [].concat(point, this.#points);
     this.#callHandlers('dataChange');
 
     return true;
