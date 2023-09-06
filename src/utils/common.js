@@ -63,12 +63,24 @@ export const getPointDestination = (destinationId, destinations) => {
   return destinations.find((item) => item.id === destinationId);
 };
 
-export const transformRawToPoint = (points, offers, destinations) => {
-  return points.map((point) => {
-    return {
-      ...point,
-      destination: getPointDestination(point.destination, destinations),
-      offers: getPointOffers(point.offers, point.type, offers),
-    };
-  });
+export const transformPointToRaw = (point) => {
+  const offers = point.offers.map((offer) => offer.id);
+
+  return {
+    ...point,
+    destination: point.destination.id,
+    offers,
+  };
+};
+
+export const transformRawToPoint = (point, offers, destinations) => {
+  return {
+    ...point,
+    destination: getPointDestination(point.destination, destinations),
+    offers: getPointOffers(point.offers, point.type, offers),
+  };
+};
+
+export const transformRawToPoints = (points, offers, destinations) => {
+  return points.map((point) => transformRawToPoint(point, offers, destinations));
 };

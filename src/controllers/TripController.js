@@ -34,6 +34,8 @@ export default class TripController {
 
   #pointsModel;
 
+  #api;
+
   #points;
 
   #offers;
@@ -60,9 +62,10 @@ export default class TripController {
 
   #creatingButtonComponent;
 
-  constructor(container, pointsModel) {
+  constructor(container, pointsModel, api) {
     this.#container = container;
     this.#pointsModel = pointsModel;
+    this.#api = api;
 
     this.#points = [];
     this.#offers = [];
@@ -180,33 +183,53 @@ export default class TripController {
 
   #onDataChange = (pointController, oldPoint, newPoint, mode, action) => {
     if (action === ActionTypes.DELETE) {
-      const isDeleted = this.#pointsModel.removePoint(oldPoint.id);
+      this.#api.deletePoint(oldPoint.id)
+        .then(() => {
+          const isDeleted = this.#pointsModel.removePoint(oldPoint.id);
 
-      if (isDeleted) {
-        this.#updatePoints();
-      }
+          if (isDeleted) {
+            this.#updatePoints();
+          }
+        })
+        .catch(() => {
+          pointController.shake();
+        });
     } else if (action === ActionTypes.SAVE) {
       if (mode === PointControllerMode.ADDING) {
-        const isAdded = this.#pointsModel.addPoint(newPoint);
+        this.#api.createPoint(newPoint)
+          .then((newData) => {
+            const isAdded = this.#pointsModel.addPoint(newData);
 
-        if (isAdded) {
-          this.#creatingPoint = null;
-          this.#creatingButtonComponent.disabled = false;
-          this.#updatePoints();
-        }
+            if (isAdded) {
+              this.#creatingPoint = null;
+              this.#creatingButtonComponent.disabled = false;
+              this.#updatePoints();
+            }
+          })
+          .catch(() => {
+            pointController.shake();
+          });
       } else {
-        const isUpdated = this.#pointsModel.updatePoint(oldPoint.id, newPoint);
-
-        if (isUpdated) {
-          this.#updatePoints();
-        }
+        this.#updatePoint(oldPoint.id, newPoint)
+          .then((result) => {
+            if (result.isSuccess) {
+              this.#updatePoints();
+            }
+          })
+          .catch(() => {
+            pointController.shake();
+          });
       }
     } else if (action === ActionTypes.SET) {
-      const isUpdated = this.#pointsModel.updatePoint(oldPoint.id, newPoint);
-
-      if (isUpdated) {
-        pointController.render(newPoint, this.#offers, this.#destinations, mode);
-      }
+      this.#updatePoint(oldPoint.id, newPoint)
+        .then((result) => {
+          if (result.isSuccess) {
+            pointController.render(result.newData, this.#offers, this.#destinations, mode);
+          }
+        })
+        .catch(() => {
+          pointController.shake();
+        });
     } else if (action === ActionTypes.TOGGLE) {
       if (mode === PointControllerMode.ADDING) {
         this.#creatingPoint = null;
@@ -216,6 +239,15 @@ export default class TripController {
       }
     }
   };
+
+  #updatePoint(id, newPoint) {
+    return this.#api.updatePoint(id, newPoint)
+      .then((newData) => {
+        const isSuccess = this.#pointsModel.updatePoint(id, newData);
+
+        return { isSuccess, newData };
+      });
+  }
 
   #onViewChange = () => {
     this.#showedPointControllers.forEach((pointController) => pointController.setDefaultView());

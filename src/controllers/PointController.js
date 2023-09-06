@@ -8,6 +8,8 @@ import {
   RenderPosition,
 } from '../utils/render';
 
+const SHAKE_ANIMATION_TIMEOUT = 600;
+
 export default class PointController {
   #container = null;
 
@@ -51,6 +53,7 @@ export default class PointController {
 
       switch (true) {
         case btn.classList.contains('event__save-btn'):
+          btn.disabled = true;
           this.#onDataChange(this, point, this.#editDayComponent.getData(), this.#mode, ActionTypes.SAVE);
           this.#replaceEditFormToEvent();
           break;
@@ -137,5 +140,15 @@ export default class PointController {
 
     replace(this.#editDayComponent, this.#pointComponent);
     this.#editDayComponent.applyFlatpickr();
+  }
+
+  shake() {
+    this.#editDayComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this.#pointComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      this.#editDayComponent.getElement().style.animation = '';
+      this.#pointComponent.getElement().style.animation = '';
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 }
