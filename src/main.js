@@ -4,11 +4,14 @@ import FilterController from './controllers/FilterController';
 import MainContainer from './components/main-container';
 import TripTabsComponent from './components/trip-tabs';
 import LoadingComponent from './components/loading';
+import StatisticsComponent from './components/statistics';
 import AddPointButtonComponent from './components/add-point-button';
-import { TABS } from './const';
+import { Tabs } from './const';
 import { render, RenderPosition } from './utils/render';
 import { transformRawToPoint } from './utils/common';
 import { getPoints, getOffers, getDestinations } from './components/api-service';
+
+let activeTab = Tabs.TABLE;
 
 const pageMain = document.querySelector('.page-main');
 const tripMainContainer = document.querySelector('.trip-main');
@@ -18,8 +21,10 @@ const mainContainerComponent = new MainContainer();
 const loadingComponent = new LoadingComponent();
 const pointsModel = new PointsModel();
 const filterController = new FilterController(tripControlsContainer, pointsModel);
-const tripTabsComponent = new TripTabsComponent(TABS);
+const tripTabsComponent = new TripTabsComponent(Tabs, activeTab);
 const addPointButtonComponent = new AddPointButtonComponent();
+const statisticsComponent = new StatisticsComponent(pointsModel);
+const tripController = new TripController(mainContainerComponent, pointsModel);
 
 const mainContainerElement = mainContainerComponent.getElement();
 
@@ -30,17 +35,46 @@ filterController.render();
 render(pageMain, mainContainerComponent, RenderPosition.AFTERBEGIN);
 render(mainContainerElement, loadingComponent, RenderPosition.BEFOREEND);
 
+const switchTabs = (newActiveTab) => {
+  if (newActiveTab === activeTab) {
+    return;
+  }
+
+  activeTab = newActiveTab;
+  tripTabsComponent.activeTab = activeTab;
+
+  if (newActiveTab === Tabs.TABLE) {
+    addPointButtonComponent.getElement().disabled = false;
+    tripController.show();
+    statisticsComponent.hide();
+  } else if (newActiveTab === Tabs.STATS) {
+    addPointButtonComponent.getElement().disabled = true;
+    tripController.hide();
+    statisticsComponent.show();
+  }
+};
+
+const onFiltersChange = () => {
+  switchTabs(Tabs.TABLE);
+};
+
+pointsModel.setFilterChangeHandler(onFiltersChange);
+
+tripTabsComponent.setTabsChangeHandler((newActiveTab) => {
+  switchTabs(newActiveTab);
+});
+
 const initApp = (points, offers, destinations) => {
   pointsModel.points = transformRawToPoint(points, offers, destinations);
   pointsModel.offers = offers;
   pointsModel.destinations = destinations;
 
-  const tripController = new TripController(mainContainerComponent, pointsModel);
-
   loadingComponent.getElement().remove();
   loadingComponent.removeElement();
 
   tripController.render();
+
+  render(mainContainerElement, statisticsComponent, RenderPosition.BEFOREEND);
 
   addPointButtonComponent.setAddButtonClickHandler((evt) => {
     tripController.createPoint(evt.target);

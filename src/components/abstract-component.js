@@ -1,5 +1,7 @@
 import { createElement } from '../utils/render';
 
+const visuallyHiddenClass = 'visually-hidden';
+
 export default class AbstractComponent {
   #element;
 
@@ -25,5 +27,21 @@ export default class AbstractComponent {
 
   removeElement() {
     this.#element = null;
+  }
+
+  show() {
+    if (!this.#element.classList.contains(visuallyHiddenClass)) {
+      return;
+    }
+
+    this.#element.classList.remove(visuallyHiddenClass);
+  }
+
+  hide() {
+    if (this.#element.classList.contains(visuallyHiddenClass)) {
+      return;
+    }
+
+    this.#element.classList.add(visuallyHiddenClass);
   }
 }

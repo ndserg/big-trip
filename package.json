@@ -19,6 +19,8 @@
     "webpack-dev-server": "4.15.1"
   },
   "dependencies": {
+    "chart.js": "4.4.0",
+    "chartjs-plugin-datalabels": "2.2.0",
     "flatpickr": "4.6.13"
   }
 }
