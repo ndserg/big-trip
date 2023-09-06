@@ -6,8 +6,8 @@
   "scripts": {
     "eslint": "eslint src/**/*.js",
     "test": "npm run eslint",
-    "build": "webpack",
-    "start": "webpack serve"
+    "build": "webpack --config webpack.prod.js",
+    "start": "webpack serve --config webpack.dev.js"
   },
   "devDependencies": {
     "css-loader": "6.8.1",
@@ -21,6 +21,9 @@
   "dependencies": {
     "chart.js": "4.4.0",
     "chartjs-plugin-datalabels": "2.2.0",
-    "flatpickr": "4.6.13"
+    "filemanager-webpack-plugin": "8.0.0",
+    "flatpickr": "4.6.13",
+    "html-webpack-plugin": "5.5.3",
+    "webpack-merge": "5.9.0"
   }
 }
