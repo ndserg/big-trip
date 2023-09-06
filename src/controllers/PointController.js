@@ -53,7 +53,11 @@ export default class PointController {
 
       switch (true) {
         case btn.classList.contains('event__save-btn'):
-          btn.disabled = true;
+          if (!this.#validate()) {
+            this.shake();
+            return;
+          }
+
           this.#onDataChange(this, point, this.#editDayComponent.getData(), this.#mode, ActionTypes.SAVE);
           this.#replaceEditFormToEvent();
           break;
@@ -112,6 +116,18 @@ export default class PointController {
     }
   }
 
+  #validate() {
+    const point = this.#editDayComponent.getData();
+
+    let isValid = true;
+
+    if (!point.type || !point.destination.name || !point.base_price || !point.date_from || !point.date_to) {
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
   setDefaultView() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#replaceEditFormToEvent();
@@ -143,12 +159,18 @@ export default class PointController {
   }
 
   shake() {
-    this.#editDayComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
-    this.#pointComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    const form = this.#editDayComponent.getElement();
+    const point = this.#pointComponent.getElement();
+
+    form.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    point.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    form.style.border = `${2}px solid red`;
+    form.style.borderRadius = '18px';
 
     setTimeout(() => {
-      this.#editDayComponent.getElement().style.animation = '';
-      this.#pointComponent.getElement().style.animation = '';
+      form.style.animation = '';
+      point.style.animation = '';
+      form.style.border = 'none';
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 }
