@@ -12,23 +12,15 @@ const SHAKE_ANIMATION_TIMEOUT = 600;
 
 export default class PointController {
   #container = null;
+  #onDataChange = null;
+  #onViewChange = null;
 
-  #pointComponent;
-
-  #editDayComponent;
-
-  #onDataChange;
-
-  #onViewChange;
-
-  #mode;
+  #mode = Mode.DEFAULT;
+  #pointComponent = null;
+  #editDayComponent = null;
 
   constructor(container, onDataChange, onViewChange) {
     this.#container = container;
-
-    this.#mode = Mode.DEFAULT;
-    this.#pointComponent = null;
-    this.#editDayComponent = null;
 
     this.#onDataChange = onDataChange;
     this.#onViewChange = onViewChange;

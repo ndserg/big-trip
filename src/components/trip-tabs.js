@@ -21,18 +21,15 @@ const createTripTabsTemplate = (tabs, activeTab) => {
 
 export default class TripTabs extends AbstractSmartComponent {
   #tabs = null;
-
   #activeTab = null;
 
-  #tabsChangeHandler;
+  #tabsChangeHandler = null;
 
   constructor(Tabs, activeTab) {
     super();
 
     this.#tabs = Tabs;
     this.#activeTab = activeTab;
-
-    this.#tabsChangeHandler = null;
   }
 
   getTemplate() {

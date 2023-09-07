@@ -10,16 +10,13 @@ import {
 
 export default class FilterController {
   #container = null;
+  #pointsModel = null;
 
-  #pointsModel;
-
-  #filtersComponent;
+  #filtersComponent = null;
 
   constructor(container, pointsModel) {
     this.#container = container;
     this.#pointsModel = pointsModel;
-
-    this.#filtersComponent = null;
   }
 
   render() {

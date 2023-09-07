@@ -60,16 +60,14 @@ const createTripEventTemplate = (event) => {
 };
 
 export default class TripEvent extends AbstractComponent {
-  #event;
+  #event = null;
 
-  #rollupButtonClickHandler;
+  #rollupButtonClickHandler = null;
 
   constructor(event) {
     super();
 
     this.#event = event;
-
-    this.#rollupButtonClickHandler = null;
   }
 
   getTemplate() {

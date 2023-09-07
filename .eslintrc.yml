@@ -8,6 +8,8 @@
       "max-len": ["error", { "code": 280 }],
       "class-methods-use-this":
         ["error", { "exceptMethods": ["getTemplate", "recoveryListeners"] }],
+      "lines-between-class-members":
+        ["error", "always", { "exceptAfterSingleLine": true }],
       "consistent-return": "off",
     },
   "parserOptions": { "ecmaVersion": 13 },

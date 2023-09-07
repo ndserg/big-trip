@@ -16,11 +16,9 @@ const checkStatus = (response) => {
 };
 
 export default class API {
-  #authorization;
-
-  #endPoint;
-
-  #pointsModel;
+  #authorization = null;
+  #endPoint = null;
+  #pointsModel = null;
 
   constructor(endPoint, authorization, pointsModel) {
     this.#authorization = authorization;

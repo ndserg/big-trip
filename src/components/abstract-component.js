@@ -3,14 +3,12 @@ import { createElement } from '../utils/render';
 const visuallyHiddenClass = 'visually-hidden';
 
 export default class AbstractComponent {
-  #element;
+  #element = null;
 
   constructor() {
     if (new.target === AbstractComponent) {
       throw new Error("Can't instantiate AbstractComponent, only concrete one.");
     }
-
-    this.#element = null;
   }
 
   getTemplate() {

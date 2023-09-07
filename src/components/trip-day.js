@@ -24,10 +24,8 @@ const createTripDayTemplate = (day, idx, isShowDayInfo) => {
 
 export default class TripDay extends AbstractComponent {
   #day = null;
-
   #idx = null;
-
-  #isShowDayInfo;
+  #isShowDayInfo = null;
 
   constructor(day, idx, isShowDayInfo) {
     super();

@@ -225,26 +225,17 @@ const createEventFormTemplate = (point, offers, destinations, mode) => {
 
 export default class EventForm extends AbstractSmartComponent {
   #point = null;
-
   #offers = null;
-
   #destinations = null;
+  #mode = null;
 
-  #mode;
-
-  #buttonsClickHandler;
-
-  #currentPoint;
-
-  #pointOffers;
-
-  #selecetdDateFrom;
-
-  #selecetdDateTo;
-
-  #flatpickrDateFrom;
-
-  #flatpickrDateTo;
+  #currentPoint = null;
+  #pointOffers = null;
+  #selecetdDateFrom = null;
+  #selecetdDateTo = null;
+  #flatpickrDateFrom = null;
+  #flatpickrDateTo = null;
+  #buttonsClickHandler = null;
 
   constructor(point, offers, destinations, mode) {
     super();
@@ -252,6 +243,8 @@ export default class EventForm extends AbstractSmartComponent {
     this.#point = point;
     this.#offers = offers;
     this.#destinations = destinations;
+    this.#mode = mode || Mode.ADDING;
+
     this.#currentPoint = {
       id: point.id,
       type: point.type,
@@ -262,15 +255,11 @@ export default class EventForm extends AbstractSmartComponent {
       offers: point.offers,
       is_favorite: point.is_favorite,
     };
+
     this.#pointOffers = getPointTypeOffers(this.#currentPoint.type, this.#offers);
-    this.#mode = mode || Mode.ADDING;
-    this.#buttonsClickHandler = null;
 
     this.#selecetdDateFrom = this.#currentPoint.date_from;
     this.#selecetdDateTo = this.#currentPoint.date_to;
-
-    this.#flatpickrDateFrom = null;
-    this.#flatpickrDateTo = null;
 
     this.subscribeOnEvents();
   }

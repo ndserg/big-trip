@@ -49,20 +49,15 @@ const createTripSortTemplate = (sortEvents, sortType, sortDirection) => {
 export default class extends AbstractSmartComponent {
   #sortEvents = null;
 
-  #currenSortType;
+  #currenSortType = SortType.EVENT;
+  #currentSortDirection = SortDirections.INCREASE;
 
-  #currentSortDirection;
-
-  #sortTypeChangeHandler;
+  #sortTypeChangeHandler = null;
 
   constructor(SORT_EVENTS) {
     super();
 
     this.#sortEvents = SORT_EVENTS;
-    this.#currenSortType = SortType.EVENT;
-    this.#currentSortDirection = SortDirections.INCREASE;
-
-    this.#sortTypeChangeHandler = null;
   }
 
   getTemplate() {

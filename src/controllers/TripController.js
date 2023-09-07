@@ -31,58 +31,30 @@ const EpmtyPoint = {
 
 export default class TripController {
   #container = null;
+  #pointsModel = null;
+  #api = null;
 
-  #pointsModel;
+  #points = [];
+  #offers = [];
+  #destinations = [];
 
-  #api;
+  #showedPointControllers = [];
+  #showedDaysComponents = [];
+  #showedTripDayEventsComponents = [];
 
-  #points;
-
-  #offers;
-
-  #destinations;
-
-  #tripInfoComponent;
-
+  #tripInfoComponent = null;
   #eventsComponent = null;
-
   #tripDaysComponent = null;
-
   #noPointsComponent = null;
-
   #tripSortComponent = null;
 
-  #showedPointControllers;
-
-  #showedDaysComponents;
-
-  #showedTripDayEventsComponents;
-
-  #creatingPoint;
-
-  #creatingButtonComponent;
+  #creatingPoint = null;
+  #creatingButtonComponent = null;
 
   constructor(container, pointsModel, api) {
     this.#container = container;
     this.#pointsModel = pointsModel;
     this.#api = api;
-
-    this.#points = [];
-    this.#offers = [];
-    this.#destinations = [];
-
-    this.#showedPointControllers = [];
-    this.#showedDaysComponents = [];
-    this.#showedTripDayEventsComponents = [];
-
-    this.#tripInfoComponent = null;
-    this.#eventsComponent = null;
-    this.#tripDaysComponent = null;
-    this.#noPointsComponent = null;
-    this.#tripSortComponent = null;
-
-    this.#creatingPoint = null;
-    this.#creatingButtonComponent = null;
 
     this.#pointsModel.setFilterChangeHandler(this.#onFilterChange);
   }

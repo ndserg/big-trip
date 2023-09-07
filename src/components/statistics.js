@@ -138,22 +138,14 @@ const createStatisticsTemplate = () => {
 };
 
 export default class Statistics extends AbstractComponent {
-  #moneyChart;
+  #pointsModel = null;
 
-  #activityChart;
-
-  #pointsModel;
-
-  #timeSpentChart;
+  #moneyChart = null;
+  #activityChart = null;
+  #timeSpentChart = null;
 
   constructor(pointsModel) {
     super();
-
-    this.#moneyChart = null;
-
-    this.#activityChart = null;
-
-    this.#timeSpentChart = null;
 
     this.#pointsModel = pointsModel;
   }

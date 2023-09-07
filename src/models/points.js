@@ -1,27 +1,15 @@
 import { FilterType, SortDirections, SortType } from '../const';
 
 export default class PointsModel {
-  #points;
+  #points = [];
+  #offers = [];
+  #destinations = [];
+  #activeFilterType = FilterType.EVERYTHING;
 
-  #offers;
-
-  #destinations;
-
-  #activeFilterType;
-
-  #handlers;
-
-  constructor() {
-    this.#points = [];
-    this.#offers = [];
-    this.#destinations = [];
-    this.#activeFilterType = FilterType.EVERYTHING;
-
-    this.#handlers = {
-      filterChange: new Set(),
-      dataChange: new Set(),
-    };
-  }
+  #handlers = {
+    filterChange: new Set(),
+    dataChange: new Set(),
+  };
 
   getFilteredPoints() {
     const sortedPoints = this.getSortedPoints(this.#points);
